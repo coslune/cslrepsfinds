@@ -520,21 +520,67 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-// -------- Gestion Ouverture de la Popup Produit --------
+// Envoi des événements via la dataLayer de Google Tag Manager
 function openLinksPopup(product) {
-  popupProductTitle.textContent = product.name;
-  popupProductCategory.textContent = `Catégorie : ${product.category}`;
+  if (!product) return; // Sécurité si le produit est invalide
+
+  popupProductTitle.textContent = product.name || "Produit sans nom";
+  popupProductCategory.textContent = `Catégorie : ${product.category || "Non classé"}`;
   
-  if (product.seller) {
+  // Vérification du prix
+  if (product.price && product.price.trim() !== "") {
+    popupProductPrice.textContent = product.price;
+    popupProductPrice.classList.remove("hidden");
+  } else {
+    popupProductPrice.classList.add("hidden");
+  }
+
+  // Vérification du vendeur
+  if (product.seller && product.seller.trim() !== "") {
     popupProductSeller.textContent = `• Vendeur : ${product.seller}`;
     popupProductSeller.classList.remove("hidden");
   } else {
     popupProductSeller.classList.add("hidden");
   }
   
-  popupBbdLink.href = product.bbd;
-  popupWeidianLink.href = product.weidian;
-  
+  // Liens sécurisés (évite les bugs si le lien est vide)
+  popupBbdLink.href = product.bbd || "#";
+  popupWeidianLink.href = product.weidian || "#";
+
+  popupBbdLink.onclick = null;
+  popupWeidianLink.onclick = null;
+
+  // Clic sur le bouton BBD
+  popupBbdLink.onclick = () => {
+    if (window.dataLayer) {
+      dataLayer.push({
+        'event': 'click_lien_bbd',
+        'product_name': product.name,
+        'product_category': product.category
+      });
+    }
+  };
+
+  // Clic sur le bouton Weidian
+  popupWeidianLink.onclick = () => {
+    if (window.dataLayer) {
+      dataLayer.push({
+        'event': 'click_lien_weidian',
+        'product_name': product.name,
+        'product_category': product.category
+      });
+    }
+  };
+
+  // Ouverture de la fiche produit
+  if (window.dataLayer) {
+    dataLayer.push({
+      'event': 'view_product',
+      'product_name': product.name,
+      'product_category': product.category
+    });
+  }
+
   productPopup.classList.remove("hidden");
 }
 
