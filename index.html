@@ -426,10 +426,7 @@
     /* Modifications Responsive Mobile */
     @media (max-width: 768px) {
       .topbar {
-        position: absolute; 
-        top: 0;
-        left: 0;
-        width: 100%;
+        position: relative; 
         flex-direction: column;
         align-items: center;
         padding: 16px 12px;
@@ -479,7 +476,7 @@
       }
 
       main {
-        padding: 240px 12px 16px 12px; 
+        padding: 16px 12px; 
       }
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -504,7 +501,7 @@
   <div class="popup-card">
     <h2 id="popupProductTitle">Nom du Produit</h2>
     <div id="popupProductInfo" class="popup-sub">
-      <span id="popupProductPrice" class="product-price">Prix</span> <!-- Ajout Prix Popup -->
+      <span id="popupProductPrice" class="product-price">Prix</span>
       <span id="popupProductCategory">Catégorie</span>
       <span id="popupProductSeller"></span>
     </div>
@@ -526,22 +523,18 @@
     </div>
     
     <div class="social-links">
-      <!-- Discord -->
       <a href="https://discord.gg/xN6eeesfD" target="_blank" class="social-btn discord" title="Rejoindre le Discord">
         <img src="https://th.bing.com/th/id/OIP.EZkdm25nbQDs_PjFN8hmewHaHa?w=179&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Discord">
       </a>
 
-      <!-- Telegram -->
       <a href="https://t.me/+c6FdBetY4TQ5Zjdk" target="_blank" class="social-btn telegram" title="Rejoindre le Telegram">
         <img src="https://th.bing.com/th/id/OIP.RoaeSbQ4aLaB6ifctJ5eBAHaHa?w=179&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Telegram">
       </a>
 
-      <!-- TikTok -->
       <a href="https://www.tiktok.com/@bbdbuyxyou?is_from_webapp=1&sender_device=pc" target="_blank" class="social-btn tiktok" title="Nous suivre sur TikTok">
         <img src="https://th.bing.com/th/id/OIP.hG2pQRJiUa9gxkLFPQy6tQHaHa?w=170&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="TikTok">
       </a>
 
-      <!-- BbdBuy -->
       <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" class="social-btn bbd-nav" title="S'inscrire sur BbdBuy">
         <img src="https://th.bing.com/th/id/OIP.-ykdS5LGPrH4ftZI26C9iAHaHa?w=166&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="BbdBuy">
       </a>
@@ -585,13 +578,25 @@
     <div class="product-content">
       <h3 class="product-title"></h3>
       <div class="product-tags">
-        <span class="product-price hidden"></span> <!-- Ajout Tag Prix -->
+        <span class="product-price hidden"></span>
         <span class="product-category"></span>
         <span class="product-seller hidden"></span>
       </div>
     </div>
   </div>
 </template>
+
+<div id="popupBBD" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+  <div style="background: #121212; color: white; width: 85%; max-width: 320px; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid #2eaadc; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
+    <button id="btnExitPopupBbd" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #9ca3af; font-size: 22px; cursor: pointer; transition: 0.2s; z-index: 10000;">✕</button>
+    <h2 style="font-weight: 800; font-size: 16px; color: #2eaadc; margin-top: 5px; margin-bottom: 8px;">REJOINS BBDBUY !</h2>
+    <p style="font-size: 11px; color: #9ca3af; line-height: 1.4; margin-bottom: 15px;">Inscris-toi dès maintenant sur BbdBuy pour obtenir ton pack de coupons exclusifs.</p>
+    <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" style="display: block; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 13px; text-decoration: none; background: #2eaadc; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">S'INSCRIRE ICI</a>
+    <label style="display:block; margin-top:15px; font-size:11px; color:#9ca3af; cursor:pointer;">
+      <input type="checkbox" id="noMore" style="margin-right: 6px;"> Ne plus afficher
+    </label>
+  </div>
+</div>
 
 <script>
 const categoryContainer = document.getElementById("categoryContainer");
@@ -606,7 +611,7 @@ const productPopup = document.getElementById("productPopup");
 const popupProductTitle = document.getElementById("popupProductTitle");
 const popupProductCategory = document.getElementById("popupProductCategory");
 const popupProductSeller = document.getElementById("popupProductSeller");
-const popupProductPrice = document.getElementById("popupProductPrice"); // Ajouté
+const popupProductPrice = document.getElementById("popupProductPrice");
 const popupBbdLink = document.getElementById("popupBbdLink");
 const popupWeidianLink = document.getElementById("popupWeidianLink");
 const closeProductPopup = document.getElementById("closeProductPopup");
@@ -652,7 +657,6 @@ function openLinksPopup(product) {
   popupProductTitle.textContent = product.name;
   popupProductCategory.textContent = `Catégorie : ${product.category}`;
   
-  // Gestion affichage Prix Popup
   if (product.price) {
     popupProductPrice.textContent = product.price;
     popupProductPrice.classList.remove("hidden");
@@ -710,7 +714,6 @@ async function loadData() {
   }
 }
 
-// MODIFICATION ICI : Lecture de la 7ème valeur pour le prix
 function parseProducts(text, validCategories, validSellers) {
   const blocks = text.split("##").map(b => b.trim()).filter(Boolean);
   products = [];
@@ -725,7 +728,7 @@ function parseProducts(text, validCategories, validSellers) {
     const bbd = infos[3];
     const weidian = infos[4];
     let seller = infos[5] || "";
-    let price = infos[6] || ""; // Récupère le prix en position 7
+    let price = infos[6] || "";
     
     if (validSellers.length > 0 && seller && !validSellers.includes(seller)) {
       seller = "";
@@ -768,7 +771,6 @@ function renderProducts(data) {
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
 
-      // Gestion affichage Prix carte
       const priceTag = clone.querySelector(".product-price");
       if (product.price) {
         priceTag.textContent = product.price;
@@ -828,15 +830,20 @@ categorySelect.addEventListener("change", filterAndSort);
 
 loadData();
 
-// Popup Automatique BBDBUY
-(function initBbdPopup() {
+// Popup Automatique BBDBUY - Corrigé et sécurisé pour s'exécuter après chargement complet
+window.addEventListener("DOMContentLoaded", () => {
   if (!localStorage.getItem('hideBBD')) {
     setTimeout(() => {
       const popup = document.getElementById('popupBBD');
       if (popup) popup.style.display = 'flex';
     }, 1000);
   }
-})();
+  
+  const exitBtn = document.getElementById('btnExitPopupBbd');
+  if(exitBtn) {
+    exitBtn.addEventListener('click', closePopup);
+  }
+});
 
 function closePopup() {
   if (document.getElementById('noMore').checked) {
@@ -846,19 +853,5 @@ function closePopup() {
   if (popup) popup.style.display = 'none';
 }
 </script>
-
-<!-- Code Popup BBD -->
-<div id="popupBBD" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
-  <div style="background: #121212; color: white; width: 85%; max-width: 320px; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid #2eaadc; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
-    <button onclick="closePopup()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #9ca3af; font-size: 22px; cursor: pointer; transition: 0.2s; z-index: 10000;">✕</button>
-    <h2 style="font-weight: 800; font-size: 16px; color: #2eaadc; margin-top: 5px; margin-bottom: 8px;">REJOINS BBDBUY !</h2>
-    <p style="font-size: 11px; color: #9ca3af; line-height: 1.4; margin-bottom: 15px;">Inscris-toi dès maintenant sur BbdBuy pour obtenir ton pack de coupons exclusifs.</p>
-    <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" style="display: block; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 13px; text-decoration: none; background: #2eaadc; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">S'INSCRIRE ICI</a>
-    <label style="display:block; margin-top:15px; font-size:11px; color:#9ca3af; cursor:pointer;">
-      <input type="checkbox" id="noMore" style="margin-right: 6px;"> Ne plus afficher
-    </label>
-  </div>
-</div>
-
 </body>
 </html>
