@@ -9,5 +9,6 @@ PULL#Demi zip energy noir#https://bbd-buy.oss-cn-hongkong.aliyuncs.com/INBOUND/S
 #T-SHIRT#T-shirt os#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69bceb05be4b1.jpg#https://www.bbdbuyeu.com/goods/WEIDIAN/7705751717#https://weidian.com/item.html?itemID=7705751717#CCOO#
 #T-SHIRT#T-shirt os#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69b53a905b5a3.jpg#https://www.bbdbuyeu.com/goods/WEIDIAN/7705751717#https://weidian.com/item.html?itemID=7705751717#CCOO#
 #PULL#Tempo machine#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69c4d9a6d8e1a.jpg#https://www.bbdbuyeu.com/goods/WEIDIAN/7760533989#https://weidian.com/item.html?itemID=7760533989#LJC#
-#T-SHIRT#Miler#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69b63f12bf673.jpg#https://www.bbdbuyeu.com/goods/WEIDIAN/7690483080?inviteCode=eagiVC#https://shop1731801003.v.weidian.com/item.html?itemID=7690483080
-#T-SHIRT#CP compagny#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69ac0c06d056d.jpg#https://www.bbdbuyeu.com/goods/1688/795845546377?inviteCode=eagiVC#https://detail.1688.com/offer/795845546377.html
+#T-SHIRT#Miler#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69b63f12bf673.jpg#https://www.bbdbuyeu.com/goods/WEIDIAN/7690483080?inviteCode=eagiVC#https://shop1731801003.v.weidian.com/item.html?itemID=7690483080#
+#T-SHIRT#CP compagny#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69ac0c06d056d.jpg#https://www.bbdbuyeu.com/goods/1688/795845546377?inviteCode=eagiVC#https://detail.1688.com/offer/795845546377.html#
+#PULL#Spyder#https://bbdbuy.oss-cn-hongkong.aliyuncs.com/images/watermarked_69672bc71b6d7.jpg#https://www.bbdbuyeu.com/goods/1688/854971939801?inviteCode=eagiVC#
