@@ -302,168 +302,6 @@
       gap: 6px;
     }
 
-    /* Container de liens de la popup produit */
-    .popup-links-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .popup-btn {
-      width: 100%;
-      text-decoration: none;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-align: center;
-      display: block;
-      transition: background 0.15s ease, transform 0.1s ease;
-    }
-
-    .popup-btn:active {
-      transform: scale(0.98);
-    }
-
-    .popup-btn.bbd {
-      background: var(--accent);
-      color: #ffffff;
-    }
-
-    .popup-btn.bbd:hover {
-      background: var(--accent-hover);
-    }
-
-    .popup-btn.weidian {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .popup-btn.weidian:hover {
-      background: var(--input-bg);
-    }
-
-    .popup-close-text {
-      display: inline-block;
-      margin-top: 16px;
-      font-size: 0.8rem;
-      color: var(--muted);
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @media (max-width: 768px) {
-      .topbar {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 12px;
-        gap: 12px;
-      }
-      .actions {
-        width: 100%;
-        flex-wrap: wrap;
-      }
-      .search-wrapper {
-        flex-grow: 1;
-        width: 100%;
-      }
-      input, select {
-        width: 100%;
-      }
-      main {
-        padding: 16px 12px;
-      }
-      .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 8px;
-      }
-      .product-images img {
-        height: 110px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-<div id="tiktokPopup" class="popup-overlay hidden">
-  <div class="popup-card">
-    <h2>Ouvre le site dans ton navigateur</h2>
-    <p>
-      Pour une meilleure expérience, ouvre ce site via les <strong>3 petits points</strong> de TikTok puis cliquez sur <strong>“Ouvrir dans le navigateur”</strong>.
-    </p>
-    <button id="closePopup" style="width: 100%; background: var(--accent); color: white; border: none; padding: 10px; font-weight: 600; border-radius: 6px;">Compris</button>
-  </div>
-</div>
-
-<div id="productPopup" class="popup-overlay hidden">
-  <div class="popup-card">
-    <h2 id="popupProductTitle">Nom du Produit</h2>
-    <div id="popupProductInfo" class="popup-sub">
-      <span id="popupProductCategory">Catégorie</span>
-      <span id="popupProductSeller"></span>
-    </div>
-    
-    <div class="popup-links-container">
-      <a id="popupBbdLink" class="popup-btn bbd" target="_blank">Ouvrir le lien BBD</a>
-      <a id="popupWeidianLink" class="popup-btn weidian" target="_blank">Ouvrir le lien Weidian</a>
-    </div>
-    
-    <span id="closeProductPopup" class="popup-close-text">Fermer</span>
-  </div>
-</div>
-
-<header class="topbar">
-  <div class="brand">
-    <h1>CSL FINDS</h1>
-    <p>Les meilleurs liens !</p>
-  </div>
-
-  <div class="actions">
-    <div class="search-wrapper">
-      <input type="text" id="searchInput" placeholder="Rechercher un produit..." />
-    </div>
-
-    <select id="sellerSelect">
-      <option value="all">Tous les vendeurs</option>
-    </select>
-
-    <select id="sortSelect">
-      <option value="default">Tri par défaut</option>
-      <option value="az">Nom : A → Z</option>
-      <option value="za">Nom : Z → A</option>
-    </select>
-
-    <button id="themeToggle" title="Changer le thème">🌙</button>
-  </div>
-</header>
-
-<main>
-  <div id="categoryContainer"></div>
-</main>
-
-<template id="productTemplate">
-  <div class="product-card">
-    <div class="product-images"></div>
-    <div class="product-content">
-      <h3 class="product-title"></h3>
-      <div class="product-tags">
-        <span class="product-category"></span>
-        <span class="product-seller hidden"></span>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
 const categoryContainer = document.getElementById("categoryContainer");
 const template = document.getElementById("productTemplate");
@@ -520,10 +358,12 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-// -------- Gestion Ouverture de la Popup Produit --------
+// -------- Gestion Ouverture de la Popup Produit (Version corrigée et propre) --------
 function openLinksPopup(product) {
-  popupProductTitle.textContent = product.name;
-  popupProductCategory.textContent = `Catégorie : ${product.category}`;
+  if (!product) return;
+
+  popupProductTitle.textContent = product.name || "Produit sans nom";
+  popupProductCategory.textContent = `Catégorie : ${product.category || "Non classé"}`;
   
   if (product.seller) {
     popupProductSeller.textContent = `• Vendeur : ${product.seller}`;
@@ -532,8 +372,34 @@ function openLinksPopup(product) {
     popupProductSeller.classList.add("hidden");
   }
   
-  popupBbdLink.href = product.bbd;
-  popupWeidianLink.href = product.weidian;
+  popupBbdLink.href = product.bbd || "#";
+  popupWeidianLink.href = product.weidian || "#";
+  
+  popupBbdLink.onclick = null;
+  popupWeidianLink.onclick = null;
+
+  // Envoi propre à Google Tag Manager sans utiliser "gtag"
+  if (window.dataLayer) {
+    window.dataLayer.push({
+      'event': 'view_product',
+      'product_name': product.name,
+      'product_category': product.category
+    });
+
+    popupBbdLink.onclick = () => {
+      window.dataLayer.push({
+        'event': 'click_lien_bbd',
+        'product_name': product.name
+      });
+    };
+
+    popupWeidianLink.onclick = () => {
+      window.dataLayer.push({
+        'event': 'click_lien_weidian',
+        'product_name': product.name
+      });
+    };
+  }
   
   productPopup.classList.remove("hidden");
 }
@@ -550,14 +416,12 @@ async function loadData() {
     const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => res.text());
     const productsText = await fetch("Produit.txt?t=" + Date.now()).then(res => res.text());
     
-    // Chargement optionnel du fichier vendeur.txt
     let sellers = [];
     try {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
       const cleanSellersText = sellersText.replace(/[\r\n]/g, "").trim();
       sellers = cleanSellersText.split("#").map(s => s.trim()).filter(Boolean);
       
-      // Remplissage dynamique du menu de sélection des vendeurs
       sellers.forEach(seller => {
         const option = document.createElement("option");
         option.value = seller;
@@ -598,12 +462,10 @@ function parseProducts(text, validCategories, validSellers) {
     const bbd = infos[3];
     const weidian = infos[4];
     
-    // Le 6ème élément (vendeur) est optionnel
     let seller = infos[5] || "";
     
-    // Sécurité de filtrage : si un fichier vendeur existe et qu'il y a un vendeur, on vérifie la cohérence
     if (validSellers.length > 0 && seller && !validSellers.includes(seller)) {
-      seller = ""; // réinitialise s'il n'est pas déclaré dans vendeur.txt
+      seller = ""; 
     }
 
     if (!validCategories.includes(category)) return;
@@ -645,7 +507,6 @@ function renderProducts(data) {
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
 
-      // Gestion de l'affichage dynamique du tag vendeur en bleu
       const sellerTag = clone.querySelector(".product-seller");
       if (product.seller) {
         sellerTag.textContent = product.seller;
@@ -676,6 +537,30 @@ function filterAndSort() {
   const searchValue = searchInput.value.toLowerCase();
   const sellerValue = sellerSelect.value;
   
+  let filtered = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchValue);
+    const matchesSeller = (sellerValue === "all") || (product.seller === sellerValue);
+    return matchesSearch && matchesSeller;
+  });
+
+  const sort = sortSelect.value;
+  if (sort === "az") {
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sort === "za") {
+    filtered.sort((a, b) => b.name.localeCompare(a.name));
+  }
+
+  renderProducts(filtered);
+}
+
+searchInput.addEventListener("input", filterAndSort);
+sellerSelect.addEventListener("change", filterAndSort);
+sortSelect.addEventListener("change", filterAndSort);
+
+loadData();
+</script>
+</body>
+</html>
   // 1. Filtrage combiné (Recherche textuelle + Menu vendeur)
   let filtered = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchValue);
