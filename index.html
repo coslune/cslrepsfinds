@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CSL FINDS</title>
   
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX'); // Remplace ici
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,6 +33,10 @@
       /* Couleur pour le tag vendeur bleu */
       --bg-seller: rgba(37, 99, 235, 0.2);
       --text-seller: #60a5fa;
+
+      /* Couleur pour le tag prix */
+      --bg-price: rgba(16, 185, 129, 0.15);
+      --text-price: #34d399;
     }
 
     /* Thème Clair - Style Notion Pur */
@@ -43,6 +54,9 @@
       
       --bg-seller: #dbeafe;
       --text-seller: #1e40af;
+
+      --bg-price: #d1fae5;
+      --text-price: #065f46;
     }
 
     * {
@@ -59,7 +73,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Barre supérieure (Topbar) - Reste en haut sur PC, défile sur Mobile */
+    /* Barre supérieure (Topbar) */
     .topbar {
       position: sticky;
       top: 0;
@@ -103,7 +117,6 @@
       align-items: center;
     }
 
-    /* Centrage absolu de l'image à l'intérieur du bouton */
     .social-btn {
       display: flex !important;
       align-items: center !important;
@@ -143,9 +156,8 @@
       position: relative;
     }
 
-    /* Nouvelle barre de recherche collante uniquement pour Mobile */
     .mobile-search-bar {
-      display: none; /* Cachée sur PC */
+      display: none; 
     }
 
     input, select, button {
@@ -302,6 +314,15 @@
       font-weight: 600;
     }
 
+    .product-price {
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--bg-price);
+      color: var(--text-price);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
     /* Popups */
     .popup-overlay {
       position: fixed;
@@ -345,6 +366,7 @@
       margin-bottom: 18px;
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 6px;
     }
 
@@ -407,10 +429,10 @@
       to { opacity: 1; }
     }
 
-    /* Modifications Responsive Mobile MODIFIÉES ICI */
+    /* Modifications Responsive Mobile */
     @media (max-width: 768px) {
       .topbar {
-        position: absolute; /* Reste tout en haut de la page, ne suit plus le défilement */
+        position: absolute; 
         top: 0;
         left: 0;
         width: 100%;
@@ -433,7 +455,6 @@
         justify-content: center;
       }
       
-      /* On cache la zone de recherche classique dans la topbar mobile */
       .topbar .actions .search-wrapper {
         display: none;
       }
@@ -444,7 +465,6 @@
         justify-content: center;
       }
       
-      /* Style de la nouvelle barre de recherche collante sur Mobile */
       .mobile-search-bar {
         display: block;
         position: sticky;
@@ -464,7 +484,6 @@
         padding: 8px 12px;
       }
 
-      /* Pour décaler le contenu pour pas qu'il soit caché sous l'en-tête absolue au départ */
       main {
         padding: 240px 12px 16px 12px; 
       }
@@ -491,6 +510,7 @@
   <div class="popup-card">
     <h2 id="popupProductTitle">Nom du Produit</h2>
     <div id="popupProductInfo" class="popup-sub">
+      <span id="popupProductPrice" class="product-price">Prix</span>
       <span id="popupProductCategory">Catégorie</span>
       <span id="popupProductSeller"></span>
     </div>
@@ -567,6 +587,7 @@
     <div class="product-content">
       <h3 class="product-title"></h3>
       <div class="product-tags">
+        <span class="product-price hidden"></span>
         <span class="product-category"></span>
         <span class="product-seller hidden"></span>
       </div>
@@ -578,7 +599,7 @@
 const categoryContainer = document.getElementById("categoryContainer");
 const template = document.getElementById("productTemplate");
 const searchInput = document.getElementById("searchInput");
-const mobileSearchInput = document.getElementById("mobileSearchInput"); // Ajouté pour Mobile
+const mobileSearchInput = document.getElementById("mobileSearchInput"); 
 const sellerSelect = document.getElementById("sellerSelect");
 const categorySelect = document.getElementById("categorySelect"); 
 const themeToggle = document.getElementById("themeToggle");
@@ -587,11 +608,13 @@ const productPopup = document.getElementById("productPopup");
 const popupProductTitle = document.getElementById("popupProductTitle");
 const popupProductCategory = document.getElementById("popupProductCategory");
 const popupProductSeller = document.getElementById("popupProductSeller");
+const popupProductPrice = document.getElementById("popupProductPrice");
 const popupBbdLink = document.getElementById("popupBbdLink");
 const popupWeidianLink = document.getElementById("popupWeidianLink");
 const closeProductPopup = document.getElementById("closeProductPopup");
 
 let products = [];
+let searchTimeout; // Pour éviter de spammer Google Analytics à chaque lettre tapée
 
 // TikTok Detection
 (function detectTikTokBrowser() {
@@ -627,18 +650,54 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-// Popup Produit
+// MODIFICATION ICI : Envoi des clics sur les liens à Google Analytics
 function openLinksPopup(product) {
   popupProductTitle.textContent = product.name;
   popupProductCategory.textContent = `Catégorie : ${product.category}`;
+  
+  if (product.price) {
+    popupProductPrice.textContent = product.price;
+    popupProductPrice.classList.remove("hidden");
+  } else {
+    popupProductPrice.classList.add("hidden");
+  }
+
   if (product.seller) {
     popupProductSeller.textContent = `• Vendeur : ${product.seller}`;
     popupProductSeller.classList.remove("hidden");
   } else {
     popupProductSeller.classList.add("hidden");
   }
+  
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
+
+  // On nettoie les anciens écouteurs pour éviter les doublons
+  popupBbdLink.onclick = null;
+  popupWeidianLink.onclick = null;
+
+  // Clic sur le bouton BBD
+  popupBbdLink.onclick = () => {
+    gtag('event', 'click_lien_bbd', {
+      'product_name': product.name,
+      'product_category': product.category
+    });
+  };
+
+  // Clic sur le bouton Weidian
+  popupWeidianLink.onclick = () => {
+    gtag('event', 'click_lien_weidian', {
+      'product_name': product.name,
+      'product_category': product.category
+    });
+  };
+
+  // Tracking : Ouverture de la fiche produit
+  gtag('event', 'view_product', {
+    'product_name': product.name,
+    'product_category': product.category
+  });
+
   productPopup.classList.remove("hidden");
 }
 
@@ -695,6 +754,7 @@ function parseProducts(text, validCategories, validSellers) {
     const bbd = infos[3];
     const weidian = infos[4];
     let seller = infos[5] || "";
+    let price = infos[6] || ""; 
     
     if (validSellers.length > 0 && seller && !validSellers.includes(seller)) {
       seller = "";
@@ -702,7 +762,7 @@ function parseProducts(text, validCategories, validSellers) {
 
     if (!validCategories.includes(category)) return;
 
-    products.push({ category, name, images, bbd, weidian, seller });
+    products.push({ category, name, images, bbd, weidian, seller, price });
   });
 }
 
@@ -737,6 +797,12 @@ function renderProducts(data) {
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
 
+      const priceTag = clone.querySelector(".product-price");
+      if (product.price) {
+        priceTag.textContent = product.price;
+        priceTag.classList.remove("hidden");
+      }
+
       const sellerTag = clone.querySelector(".product-seller");
       if (product.seller) {
         sellerTag.textContent = product.seller;
@@ -761,9 +827,8 @@ function renderProducts(data) {
   });
 }
 
-// Nouvelle logique pour synchroniser la recherche PC et Mobile
+// MODIFICATION ICI : Envoi des recherches à Google Analytics (avec un délai pour pas spammer)
 function filterAndSort(e) {
-  // Si on tape sur mobile, on synchronise la valeur sur PC, et inversement
   if (e && e.target === mobileSearchInput) {
     searchInput.value = mobileSearchInput.value;
   } else if (e && e.target === searchInput) {
@@ -773,6 +838,16 @@ function filterAndSort(e) {
   const searchValue = searchInput.value.toLowerCase();
   const sellerValue = sellerSelect.value;
   const categoryValue = categorySelect.value; 
+
+  // Système de tracking des recherches
+  clearTimeout(searchTimeout);
+  if (searchValue.trim().length > 2) {
+    searchTimeout = setTimeout(() => {
+      gtag('event', 'search_product', {
+        'search_term': searchValue
+      });
+    }, 1000); // Attend 1 seconde après que l'utilisateur a fini de taper
+  }
   
   let filtered = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchValue);
@@ -786,7 +861,7 @@ function filterAndSort(e) {
 }
 
 searchInput.addEventListener("input", filterAndSort);
-mobileSearchInput.addEventListener("input", filterAndSort); // Ajouté pour Mobile
+mobileSearchInput.addEventListener("input", filterAndSort); 
 sellerSelect.addEventListener("change", filterAndSort);
 categorySelect.addEventListener("change", filterAndSort); 
 
@@ -802,7 +877,6 @@ loadData();
   }
 })();
 
-// Fonction fermeture popup
 function closePopup() {
   if (document.getElementById('noMore').checked) {
     localStorage.setItem('hideBBD', 'true');
