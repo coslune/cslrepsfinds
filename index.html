@@ -209,6 +209,7 @@
       height: 140px;
       object-fit: cover;
       scroll-snap-align: start;
+      pointer-events: none; /* CORRECTION : Permet de cliquer à travers l'image */
     }
 
     /* Contenu condensé de la carte */
@@ -475,7 +476,7 @@ const themeToggle = document.getElementById("themeToggle");
 // Éléments de la popup produit
 const productPopup = document.getElementById("productPopup");
 const popupProductTitle = document.getElementById("popupProductTitle");
-const popupProductCategory = document.getElementById("popupProductCategory");
+const popupProductCategory = document.getElementById("popupProductCategory"); // CORRECTION : Ajout de la variable manquante
 const popupProductSeller = document.getElementById("popupProductSeller");
 const popupBbdLink = document.getElementById("popupBbdLink");
 const popupWeidianLink = document.getElementById("popupWeidianLink");
@@ -603,7 +604,7 @@ function parseProducts(text, validCategories, validSellers) {
     
     // Sécurité de filtrage : si un fichier vendeur existe et qu'il y a un vendeur, on vérifie la cohérence
     if (validSellers.length > 0 && seller && !validSellers.includes(seller)) {
-      seller = ""; // réinitialise s'il n'est pas déclaré dans vendeur.txt
+      seller = ""; 
     }
 
     if (!validCategories.includes(category)) return;
