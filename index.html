@@ -189,7 +189,7 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.05);
     }
 
-    /* Galerie photos compacte - pointer-events corrigé pour laisser passer le clic */
+    /* Galerie photos compacte */
     .product-images {
       display: flex;
       overflow-x: auto;
@@ -197,7 +197,7 @@
       scrollbar-width: none;
       background: rgba(0,0,0,0.02);
       border-bottom: 1px solid var(--border);
-      pointer-events: none; 
+      pointer-events: none; /* TRÈS IMPORTANT : Permet de cliquer à travers les images pour ouvrir la popup */
     }
 
     .product-images::-webkit-scrollbar {
@@ -545,8 +545,20 @@ function openLinksPopup(product) {
     popupProductSeller.classList.add("hidden");
   }
   
-  popupBbdLink.href = product.bbd;
-  popupWeidianLink.href = product.weidian;
+  // Configuration dynamique des liens (masque le bouton si le lien est inexistant)
+  if(product.bbd && product.bbd !== "#") {
+    popupBbdLink.href = product.bbd;
+    popupBbdLink.classList.remove("hidden");
+  } else {
+    popupBbdLink.classList.add("hidden");
+  }
+
+  if(product.weidian && product.weidian !== "#") {
+    popupWeidianLink.href = product.weidian;
+    popupWeidianLink.classList.remove("hidden");
+  } else {
+    popupWeidianLink.classList.add("hidden");
+  }
   
   productPopup.classList.remove("hidden");
 }
