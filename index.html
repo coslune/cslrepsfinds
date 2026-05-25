@@ -44,60 +44,49 @@
       --bg-seller: #dbeafe;
       --text-seller: #1e40af;
     }
-/* Alignement du titre et des réseaux à gauche */
-.brand-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
 
-/* Conteneur des réseaux */
-.social-links {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+    /* ---- STYLES RESEAUX SOCIAUX NAVBAR ---- */
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
 
-/* Style de base des boutons de réseaux */
-.social-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border: 1px solid var(--border);
-  background: var(--input-bg);
-  color: var(--text);
-}
+    .social-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
 
-.social-btn:hover {
-  transform: translateY(-1px);
-}
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%; /* Format style photo de profil (Ronde) */
+      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+    }
 
-/* Couleurs personnalisées au survol */
-.social-btn.discord:hover { background: #5865F2; color: white; border-color: #5865F2; }
-.social-btn.telegram:hover { background: #0088cc; color: white; border-color: #0088cc; }
-.social-btn.tiktok:hover { background: #000000; color: white; border-color: #333; }
-body.light .social-btn.tiktok:hover { background: #000000; }
-.social-btn.bbd-nav:hover { background: var(--accent); color: white; border-color: var(--accent); }
+    .social-btn:hover {
+      transform: translateY(-2px);
+    }
 
-/* Ajustement Mobile pour que tout reste aligné */
-@media (max-width: 768px) {
-  .brand-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .social-links {
-    width: 100%;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-}
+    .social-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Couleurs au survol spécifiques aux réseaux */
+    .social-btn.discord:hover { background: #5865F2; color: white; border-color: #5865F2; }
+    .social-btn.telegram:hover { background: #0088cc; color: white; border-color: #0088cc; }
+    .social-btn.tiktok:hover { background: #000000; color: white; border-color: #333; }
+    body.light .social-btn.tiktok:hover { background: #000000; }
+    .social-btn.bbd-nav:hover { background: #ffaa00; color: white; border-color: #ffaa00; }
+
     * {
       margin: 0;
       padding: 0;
@@ -213,14 +202,14 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       background: var(--border);
     }
 
-    /* Grille de produits beaucoup plus compacte (Mini-Cartes) */
+    /* Grille de produits */
     .products-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 12px;
     }
 
-    /* Carte Produit - Cliquable et épurée */
+    /* Carte Produit */
     .product-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -242,7 +231,7 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       box-shadow: 0 6px 12px rgba(0,0,0,0.05);
     }
 
-    /* Galerie photos compacte */
+    /* Galerie photos - FORCÉ EN CARRÉ PARFAIT */
     .product-images {
       display: flex;
       overflow-x: auto;
@@ -250,6 +239,8 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       scrollbar-width: none;
       background: rgba(0,0,0,0.02);
       border-bottom: 1px solid var(--border);
+      width: 100%;
+      aspect-ratio: 1 / 1; /* Force le conteneur à être un carré parfait */
     }
 
     .product-images::-webkit-scrollbar {
@@ -259,12 +250,12 @@ body.light .social-btn.tiktok:hover { background: #000000; }
     .product-images img {
       width: 100%;
       min-width: 100%;
-      height: 140px;
-      object-fit: cover;
+      height: 100%;
+      object-fit: cover; /* Remplissage intelligent sans déformation */
       scroll-snap-align: start;
     }
 
-    /* Contenu condensé de la carte */
+    /* Contenu de la carte */
     .product-content {
       padding: 10px;
       display: flex;
@@ -282,14 +273,12 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       text-overflow: ellipsis;
     }
 
-    /* Groupement des tags côte à côte */
     .product-tags {
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
     }
 
-    /* Tag de catégorie */
     .product-category {
       padding: 2px 6px;
       border-radius: 4px;
@@ -299,7 +288,6 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       font-weight: 600;
     }
 
-    /* Tag de vendeur (Bleu) */
     .product-seller {
       padding: 2px 6px;
       border-radius: 4px;
@@ -309,7 +297,7 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       font-weight: 600;
     }
 
-    /* Design des Overlays / Popups */
+    /* Popups */
     .popup-overlay {
       position: fixed;
       inset: 0;
@@ -355,7 +343,6 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       gap: 6px;
     }
 
-    /* Container de liens de la popup produit */
     .popup-links-container {
       display: flex;
       flex-direction: column;
@@ -422,6 +409,16 @@ body.light .social-btn.tiktok:hover { background: #000000; }
         padding: 12px;
         gap: 12px;
       }
+      .brand-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .social-links {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
       .actions {
         width: 100%;
         flex-wrap: wrap;
@@ -439,9 +436,6 @@ body.light .social-btn.tiktok:hover { background: #000000; }
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: 8px;
-      }
-      .product-images img {
-        height: 110px;
       }
     }
   </style>
@@ -483,20 +477,21 @@ body.light .social-btn.tiktok:hover { background: #000000; }
     </div>
     
     <div class="social-links">
-      <a href="https://discord.gg/xN6eeesfD" target="_blank" class="social-btn discord" CSLREPS="Rejoindre le Discord">
-        <svg viewBox="0 0 127.14 96.36" width="16" height="16" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.71-11,68.6,68.6,0,0,1-10.57-5c.87-.64,1.72-1.31,2.53-2a75.7,75.7,0,0,0,65.66,0c.81.7,1.66,1.37,2.53,2a68.6,68.6,0,0,1-10.57,5,74.37,74.37,0,0,0,6.71,11,105.73,105.73,0,0,0,31-18.83C129.93,50.54,124.08,27.75,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/></svg>
-        <span>Discord</span>
+      <!-- Discord -->
+      <a href="https://discord.gg/xN6eeesfD" target="_blank" class="social-btn discord" title="Rejoindre le Discord">
+        <svg viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.71-11,68.6,68.6,0,0,1-10.57-5c.87-.64,1.72-1.31,2.53-2a75.7,75.7,0,0,0,65.66,0c.81.7,1.66,1.37,2.53,2a68.6,68.6,0,0,1-10.57,5,74.37,74.37,0,0,0,6.71,11,105.73,105.73,0,0,0,31-18.83C129.93,50.54,124.08,27.75,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/></svg>
       </a>
+      <!-- Telegram -->
       <a href="https://t.me/+c6FdBetY4TQ5Zjdk" target="_blank" class="social-btn telegram" title="Rejoindre le Telegram">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-        <span>Telegram</span>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
       </a>
+      <!-- TikTok -->
       <a href="https://www.tiktok.com/@bbdbuyxyou?is_from_webapp=1&sender_device=pc" target="_blank" class="social-btn tiktok" title="Nous suivre sur TikTok">
-        <svg viewBox="0 0 448 512" width="14" height="14" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a72.43,72.43,0,1,0,40.3,65V0h89.9a111.45,111.45,0,0,0,14.6,56.89,112.11,112.11,0,0,0,51,41.6V188.31A111.11,111.11,0,0,0,448,209.91Z"/></svg>
-        <span>TikTok</span>
+        <svg viewBox="0 0 448 512" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a72.43,72.43,0,1,0,40.3,65V0h89.9a111.45,111.45,0,0,0,14.6,56.89,112.11,112.11,0,0,0,51,41.6V188.31A111.11,111.11,0,0,0,448,209.91Z"/></svg>
       </a>
+      <!-- BbdBuy -->
       <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" class="social-btn bbd-nav" title="S'inscrire sur BbdBuy">
-        ⭐ <span>BbdBuy</span>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
       </a>
     </div>
   </div>
@@ -545,7 +540,6 @@ const sellerSelect = document.getElementById("sellerSelect");
 const sortSelect = document.getElementById("sortSelect");
 const themeToggle = document.getElementById("themeToggle");
 
-// Éléments de la popup produit
 const productPopup = document.getElementById("productPopup");
 const popupProductTitle = document.getElementById("popupProductTitle");
 const popupProductCategory = document.getElementById("popupProductCategory");
@@ -556,18 +550,15 @@ const closeProductPopup = document.getElementById("closeProductPopup");
 
 let products = [];
 
-// -------- TikTok Detection --------
+// TikTok Detection
 (function detectTikTokBrowser() {
   const alreadySeen = localStorage.getItem("tiktokPopupSeen");
   if (alreadySeen) return;
-
   const ua = navigator.userAgent || navigator.vendor || window.opera;
   const isTikTok = ua.includes("TikTok") || ua.includes("musical_ly");
-
   if (isTikTok) {
     const popup = document.getElementById("tiktokPopup");
     popup.classList.remove("hidden");
-
     document.getElementById("closePopup").addEventListener("click", () => {
       popup.classList.add("hidden");
       localStorage.setItem("tiktokPopupSeen", "true");
@@ -575,7 +566,7 @@ let products = [];
   }
 })();
 
-// -------- Gestion du Thème --------
+// Gestion du Thème
 (function loadTheme() {
   const saved = localStorage.getItem("theme");
   if (saved === "light") {
@@ -593,44 +584,38 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-// -------- Gestion Ouverture de la Popup Produit --------
+// Popup Produit
 function openLinksPopup(product) {
   popupProductTitle.textContent = product.name;
   popupProductCategory.textContent = `Catégorie : ${product.category}`;
-  
   if (product.seller) {
     popupProductSeller.textContent = `• Vendeur : ${product.seller}`;
     popupProductSeller.classList.remove("hidden");
   } else {
     popupProductSeller.classList.add("hidden");
   }
-  
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
-  
   productPopup.classList.remove("hidden");
 }
 
-// Événements de fermeture de la popup produit
 closeProductPopup.addEventListener("click", () => productPopup.classList.add("hidden"));
 productPopup.addEventListener("click", (e) => {
   if (e.target === productPopup) productPopup.classList.add("hidden");
 });
 
-// -------- Chargement et Parsing Automatique --------
+// Chargement des données
 async function loadData() {
   try {
     const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => res.text());
     const productsText = await fetch("Produit.txt?t=" + Date.now()).then(res => res.text());
     
-    // Chargement optionnel du fichier vendeur.txt
     let sellers = [];
     try {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
       const cleanSellersText = sellersText.replace(/[\r\n]/g, "").trim();
       sellers = cleanSellersText.split("#").map(s => s.trim()).filter(Boolean);
       
-      // Remplissage dynamique du menu de sélection des vendeurs
       sellers.forEach(seller => {
         const option = document.createElement("option");
         option.value = seller;
@@ -638,16 +623,13 @@ async function loadData() {
         sellerSelect.appendChild(option);
       });
     } catch(e) {
-      console.warn("Fichier vendeur.txt absent ou illisible. Mode sans filtre vendeur activé.");
+      console.warn("Fichier vendeur.txt absent ou illisible.");
     }
 
     const cleanCategoriesText = categoriesText.replace(/[\r\n]/g, "").trim();
     const cleanProductsText = productsText.replace(/[\r\n]/g, "").trim();
 
-    const categories = cleanCategoriesText
-      .split("#")
-      .map(cat => cat.trim())
-      .filter(Boolean);
+    const categories = cleanCategoriesText.split("#").map(cat => cat.trim()).filter(Boolean);
 
     parseProducts(cleanProductsText, categories, sellers);
     renderProducts(products);
@@ -662,7 +644,6 @@ function parseProducts(text, validCategories, validSellers) {
 
   blocks.forEach(block => {
     const infos = block.split("#").map(i => i.trim());
-    
     if (infos.length < 5) return;
 
     const category = infos[0];
@@ -670,13 +651,10 @@ function parseProducts(text, validCategories, validSellers) {
     const images = infos[2].split(",").map(img => img.trim()).filter(Boolean);
     const bbd = infos[3];
     const weidian = infos[4];
-    
-    // Le 6ème élément (vendeur) est optionnel
     let seller = infos[5] || "";
     
-    // Sécurité de filtrage : si un fichier vendeur existe et qu'il y a un vendeur, on vérifie la cohérence
     if (validSellers.length > 0 && seller && !validSellers.includes(seller)) {
-      seller = ""; // réinitialise s'il n'est pas déclaré dans vendeur.txt
+      seller = "";
     }
 
     if (!validCategories.includes(category)) return;
@@ -685,10 +663,8 @@ function parseProducts(text, validCategories, validSellers) {
   });
 }
 
-// -------- Rendu graphique --------
 function renderProducts(data) {
   categoryContainer.innerHTML = "";
-  
   if (data.length === 0) {
     categoryContainer.innerHTML = "<p style='text-align:center; color:var(--muted); margin-top:40px;'>Aucun produit trouvé.</p>";
     return;
@@ -718,7 +694,6 @@ function renderProducts(data) {
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
 
-      // Gestion de l'affichage dynamique du tag vendeur en bleu
       const sellerTag = clone.querySelector(".product-seller");
       if (product.seller) {
         sellerTag.textContent = product.seller;
@@ -734,7 +709,6 @@ function renderProducts(data) {
       });
 
       cardElement.addEventListener("click", () => openLinksPopup(product));
-
       grid.appendChild(clone);
     });
 
@@ -744,19 +718,16 @@ function renderProducts(data) {
   });
 }
 
-// -------- Recherche, Tri & Filtrage par Vendeur --------
 function filterAndSort() {
   const searchValue = searchInput.value.toLowerCase();
   const sellerValue = sellerSelect.value;
   
-  // 1. Filtrage combiné (Recherche textuelle + Menu vendeur)
   let filtered = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchValue);
     const matchesSeller = (sellerValue === "all") || (product.seller === sellerValue);
     return matchesSearch && matchesSeller;
   });
 
-  // 2. Tri alphabétique
   const sort = sortSelect.value;
   if (sort === "az") {
     filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -773,13 +744,13 @@ sortSelect.addEventListener("change", filterAndSort);
 
 loadData();
 
-// -------- Logique d'affichage automatique du Popup BBDBUY --------
+// Popup Automatique BBDBUY
 (function initBbdPopup() {
   if (!localStorage.getItem('hideBBD')) {
     setTimeout(() => {
       const popup = document.getElementById('popupBBD');
       if (popup) popup.style.display = 'flex';
-    }, 1000); // S'ouvre automatiquement au bout d'une seconde
+    }, 1000);
   }
 })();
 
