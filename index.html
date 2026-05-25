@@ -58,19 +58,26 @@
       align-items: center;
     }
 
-    .social-btn {
+   .social-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 6px; /* MODIFIÉ : Maintenant c'est un carré parfait (assorti aux cartes) */
+      width: 36px; /* Légèrement agrandi pour mieux voir l'image */
+      height: 36px;
+      border-radius: 6px;
       transition: all 0.2s ease;
-      border: 1px solid var(--border);
+      border: 2px solid var(--accent); /* Bordure plus épaisse avec la couleur accentuée */
       background: var(--input-bg);
-      color: var(--text);
+      overflow: hidden; /* Évite que l'image dépasse du carré */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Ombre pour donner du relief */
     }
 
+    /* Ajustement pour que tes images d'icônes remplissent bien le carré */
+    .social-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .social-btn:hover {
       transform: translateY(-2px);
     }
