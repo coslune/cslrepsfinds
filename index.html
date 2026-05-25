@@ -189,7 +189,7 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.05);
     }
 
-    /* Galerie photos compacte */
+    /* Galerie photos compacte - pointer-events corrigé pour laisser passer le clic */
     .product-images {
       display: flex;
       overflow-x: auto;
@@ -197,6 +197,7 @@
       scrollbar-width: none;
       background: rgba(0,0,0,0.02);
       border-bottom: 1px solid var(--border);
+      pointer-events: none; 
     }
 
     .product-images::-webkit-scrollbar {
@@ -464,6 +465,18 @@
   </div>
 </template>
 
+<div id="popupBBD" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+  <div style="background: #121212; color: white; width: 85%; max-width: 320px; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid #2eaadc; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
+    <button id="btnExitPopupBbd" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #9ca3af; font-size: 22px; cursor: pointer; transition: 0.2s; z-index: 10000;">✕</button>
+    <h2 style="font-weight: 800; font-size: 16px; color: #2eaadc; margin-top: 5px; margin-bottom: 8px;">REJOINS BBDBUY !</h2>
+    <p style="font-size: 11px; color: #9ca3af; line-height: 1.4; margin-bottom: 15px;">Inscris-toi dès maintenant sur BbdBuy pour obtenir ton pack de coupons exclusifs.</p>
+    <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" style="display: block; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 13px; text-decoration: none; background: #2eaadc; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">S'INSCRIRE ICI</a>
+    <label style="display:block; margin-top:15px; font-size:11px; color:#9ca3af; cursor:pointer;">
+      <input type="checkbox" id="noMore" style="margin-right: 6px;"> Ne plus afficher
+    </label>
+  </div>
+</div>
+
 <script>
 const categoryContainer = document.getElementById("categoryContainer");
 const template = document.getElementById("productTemplate");
@@ -598,12 +611,10 @@ function parseProducts(text, validCategories, validSellers) {
     const bbd = infos[3];
     const weidian = infos[4];
     
-    // Le 6ème élément (vendeur) est optionnel
     let seller = infos[5] || "";
     
-    // Sécurité de filtrage : si un fichier vendeur existe et qu'il y a un vendeur, on vérifie la cohérence
     if (validSellers.length > 0 && seller && !validSellers.includes(seller)) {
-      seller = ""; // réinitialise s'il n'est pas déclaré dans vendeur.txt
+      seller = ""; 
     }
 
     if (!validCategories.includes(category)) return;
@@ -645,7 +656,6 @@ function renderProducts(data) {
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
 
-      // Gestion de l'affichage dynamique du tag vendeur en bleu
       const sellerTag = clone.querySelector(".product-seller");
       if (product.seller) {
         sellerTag.textContent = product.seller;
@@ -676,14 +686,12 @@ function filterAndSort() {
   const searchValue = searchInput.value.toLowerCase();
   const sellerValue = sellerSelect.value;
   
-  // 1. Filtrage combiné (Recherche textuelle + Menu vendeur)
   let filtered = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchValue);
     const matchesSeller = (sellerValue === "all") || (product.seller === sellerValue);
     return matchesSearch && matchesSeller;
   });
 
-  // 2. Tri alphabétique
   const sort = sortSelect.value;
   if (sort === "az") {
     filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -699,6 +707,29 @@ sellerSelect.addEventListener("change", filterAndSort);
 sortSelect.addEventListener("change", filterAndSort);
 
 loadData();
+
+// -------- Initialisation et Gestion Propre de la Popup BBD --------
+window.addEventListener("DOMContentLoaded", () => {
+  if (!localStorage.getItem('hideBBD')) {
+    setTimeout(() => {
+      const popup = document.getElementById('popupBBD');
+      if (popup) popup.style.display = 'flex';
+    }, 1000);
+  }
+  
+  const exitBtn = document.getElementById('btnExitPopupBbd');
+  if(exitBtn) {
+    exitBtn.addEventListener('click', closePopup);
+  }
+});
+
+function closePopup() {
+  if (document.getElementById('noMore').checked) {
+    localStorage.setItem('hideBBD', 'true');
+  }
+  const popup = document.getElementById('popupBBD');
+  if (popup) popup.style.display = 'none';
+}
 </script>
 </body>
 </html>
