@@ -699,8 +699,26 @@ sellerSelect.addEventListener("change", filterAndSort);
 sortSelect.addEventListener("change", filterAndSort);
 
 loadData();
+
+// -------- Logique d'affichage automatique du Popup BBDBUY --------
+(function initBbdPopup() {
+  if (!localStorage.getItem('hideBBD')) {
+    setTimeout(() => {
+      const popup = document.getElementById('popupBBD');
+      if (popup) popup.style.display = 'flex';
+    }, 1000); // S'ouvre automatiquement au bout d'une seconde
+  }
+})();
+
+function closePopup() {
+  if (document.getElementById('noMore').checked) {
+    localStorage.setItem('hideBBD', 'true');
+  }
+  const popup = document.getElementById('popupBBD');
+  if (popup) popup.style.display = 'none';
+}
 </script>
-  <!-- POPUP D'INSCRIPTION BBDBUY (ORIGINAL) -->
+
 <div id="popupBBD" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
   <div style="background: #121212; color: white; width: 85%; max-width: 320px; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid #2eaadc; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
     <button onclick="closePopup()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #9ca3af; font-size: 22px; cursor: pointer; transition: 0.2s; z-index: 10000;">✕</button>
@@ -712,5 +730,6 @@ loadData();
     </label>
   </div>
 </div>
+
 </body>
 </html>
