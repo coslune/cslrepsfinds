@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-54NHP7XK');</script>
+  <!-- End Google Tag Manager -->
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CSL FINDS</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  </head>
-
-<body>
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-54NHP7XK"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <div id="tiktokPopup" class="popup-overlay hidden">
 
   <style>
     /* Variables de design - Style Notion / Airtable (Dark par défaut) */
@@ -498,6 +495,11 @@
 </head>
 <body>
 
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-54NHP7XK"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
 <div id="tiktokPopup" class="popup-overlay hidden">
   <div class="popup-card">
     <h2>Ouvre le site dans ton navigateur</h2>
@@ -616,7 +618,7 @@ const popupWeidianLink = document.getElementById("popupWeidianLink");
 const closeProductPopup = document.getElementById("closeProductPopup");
 
 let products = [];
-let searchTimeout; // Pour éviter de spammer Google Analytics à chaque lettre tapée
+let searchTimeout;
 
 // TikTok Detection
 (function detectTikTokBrowser() {
@@ -674,7 +676,6 @@ function openLinksPopup(product) {
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
 
-  // On nettoie les anciens écouteurs pour éviter les doublons
   popupBbdLink.onclick = null;
   popupWeidianLink.onclick = null;
 
@@ -829,7 +830,6 @@ function renderProducts(data) {
   });
 }
 
-// MODIFICATION ICI : Envoi des recherches à Google Analytics (avec un délai pour pas spammer)
 function filterAndSort(e) {
   if (e && e.target === mobileSearchInput) {
     searchInput.value = mobileSearchInput.value;
@@ -841,14 +841,13 @@ function filterAndSort(e) {
   const sellerValue = sellerSelect.value;
   const categoryValue = categorySelect.value; 
 
-  // Système de tracking des recherches
   clearTimeout(searchTimeout);
   if (searchValue.trim().length > 2) {
     searchTimeout = setTimeout(() => {
       gtag('event', 'search_product', {
         'search_term': searchValue
       });
-    }, 1000); // Attend 1 seconde après que l'utilisateur a fini de taper
+    }, 1000);
   }
   
   let filtered = products.filter(product => {
