@@ -522,8 +522,10 @@ themeToggle.addEventListener("click", () => {
 
 // -------- Gestion Ouverture de la Popup Produit --------
 function openLinksPopup(product) {
-  popupProductTitle.textContent = product.name;
-  popupProductCategory.textContent = `Catégorie : ${product.category}`;
+  if (!product) return; // Sécurité si le produit est vide
+
+  popupProductTitle.textContent = product.name || "Produit sans nom";
+  popupProductCategory.textContent = `Catégorie : ${product.category || "Non classé"}`;
   
   if (product.seller) {
     popupProductSeller.textContent = `• Vendeur : ${product.seller}`;
@@ -532,8 +534,34 @@ function openLinksPopup(product) {
     popupProductSeller.classList.add("hidden");
   }
   
-  popupBbdLink.href = product.bbd;
-  popupWeidianLink.href = product.weidian;
+  popupBbdLink.href = product.bbd || "#";
+  popupWeidianLink.href = product.weidian || "#";
+  
+  popupBbdLink.onclick = null;
+  popupWeidianLink.onclick = null;
+
+  // Envoi des événements à Google Tag Manager de façon propre (Pas de gtag !)
+  if (window.dataLayer) {
+    window.dataLayer.push({
+      'event': 'view_product',
+      'product_name': product.name,
+      'product_category': product.category
+    });
+
+    popupBbdLink.onclick = () => {
+      window.dataLayer.push({
+        'event': 'click_lien_bbd',
+        'product_name': product.name
+      });
+    };
+
+    popupWeidianLink.onclick = () => {
+      window.dataLayer.push({
+        'event': 'click_lien_weidian',
+        'product_name': product.name
+      });
+    };
+  }
   
   productPopup.classList.remove("hidden");
 }
