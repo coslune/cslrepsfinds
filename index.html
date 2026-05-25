@@ -394,17 +394,24 @@
   </style>
 </head>
 <body>
-
-<div id="tiktokPopup" class="popup-overlay hidden">
+<div id="productPopup" class="popup-overlay hidden">
   <div class="popup-card">
-    <h2>Ouvre le site dans ton navigateur</h2>
-    <p>
-      Pour une meilleure expérience, ouvre ce site via les <strong>3 petits points</strong> de TikTok puis cliquez sur <strong>“Ouvrir dans le navigateur”</strong>.
-    </p>
-    <button id="closePopup" style="width: 100%; background: var(--accent); color: white; border: none; padding: 10px; font-weight: 600; border-radius: 6px;">Compris</button>
+    <h2 id="popupProductTitle">Nom du Produit</h2>
+    <div id="popupProductInfo" class="popup-sub">
+      <span id="popupProductPrice" class="product-price">Prix</span>
+      <span id="popupProductCategory">Catégorie</span>
+      <span id="popupProductSeller"></span>
+    </div>
+    
+    <div class="popup-links-container">
+      <a id="popupBbdLink" class="popup-btn bbd" target="_blank">Ouvrir le lien BBD</a>
+      <a id="popupWeidianLink" class="popup-btn weidian" target="_blank">Ouvrir le lien Weidian</a>
+    </div>
+    
+    <span id="closeProductPopup" class="popup-close-text">Fermer</span>
   </div>
+  
 </div>
-
 <div id="productPopup" class="popup-overlay hidden">
   <div class="popup-card">
     <h2 id="popupProductTitle">Nom du Produit</h2>
