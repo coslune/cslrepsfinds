@@ -103,7 +103,7 @@
       align-items: center;
     }
 
-    /* CORRECTION ICI : Ajout du centrage absolu de l'image à l'intérieur du bouton */
+    /* Centrage absolu de l'image à l'intérieur du bouton */
     .social-btn {
       display: flex !important;
       align-items: center !important;
@@ -123,7 +123,7 @@
       border-color: var(--text); 
     }
 
-    /* Ajustement de la taille de l'image interne pour qu'elle reste carrée et centrée */
+    /* Ajustement de la taille de l'image interne */
     .social-btn img {
       width: 100%;
       height: 100%;
@@ -482,18 +482,22 @@
     </div>
     
     <div class="social-links">
+      <!-- Discord -->
       <a href="https://discord.gg/xN6eeesfD" target="_blank" class="social-btn discord" title="Rejoindre le Discord">
         <img src="https://th.bing.com/th/id/OIP.EZkdm25nbQDs_PjFN8hmewHaHa?w=179&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Discord">
       </a>
 
+      <!-- Telegram -->
       <a href="https://t.me/+c6FdBetY4TQ5Zjdk" target="_blank" class="social-btn telegram" title="Rejoindre le Telegram">
         <img src="https://th.bing.com/th/id/OIP.RoaeSbQ4aLaB6ifctJ5eBAHaHa?w=179&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Telegram">
       </a>
 
+      <!-- TikTok -->
       <a href="https://www.tiktok.com/@bbdbuyxyou?is_from_webapp=1&sender_device=pc" target="_blank" class="social-btn tiktok" title="Nous suivre sur TikTok">
         <img src="https://th.bing.com/th/id/OIP.hG2pQRJiUa9gxkLFPQy6tQHaHa?w=170&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="TikTok">
       </a>
 
+      <!-- BbdBuy -->
       <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" class="social-btn bbd-nav" title="S'inscrire sur BbdBuy">
         <img src="https://th.bing.com/th/id/OIP.-ykdS5LGPrH4ftZI26C9iAHaHa?w=166&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="BbdBuy">
       </a>
@@ -509,10 +513,15 @@
       <option value="all">Tous les vendeurs</option>
     </select>
 
-    <select id="sortSelect">
-      <option value="default">Tri par défaut</option>
-      <option value="az">Nom : A → Z</option>
-      <option value="za">Nom : Z → A</option>
+    <!-- CORRECTION ICI : Remplacement du tri par le filtre de catégories personnalisées -->
+    <select id="categorySelect">
+      <option value="all">Toutes les catégories</option>
+      <option value="PULL">PULL</option>
+      <option value="BAS">BAS</option>
+      <option value="CHAUSSURES">CHAUSSURES</option>
+      <option value="ACCESSOIRES">ACCESSOIRES</option>
+      <option value="T-SHIRT">T-SHIRT</option>
+      <option value="MANTEAU">MANTEAU</option>
     </select>
 
     <button id="themeToggle" title="Changer le thème">🌙</button>
@@ -541,7 +550,7 @@ const categoryContainer = document.getElementById("categoryContainer");
 const template = document.getElementById("productTemplate");
 const searchInput = document.getElementById("searchInput");
 const sellerSelect = document.getElementById("sellerSelect");
-const sortSelect = document.getElementById("sortSelect");
+const categorySelect = document.getElementById("categorySelect"); // Mis à jour
 const themeToggle = document.getElementById("themeToggle");
 
 const productPopup = document.getElementById("productPopup");
@@ -722,29 +731,28 @@ function renderProducts(data) {
   });
 }
 
+// CORRECTION ICI : Ajustement de la logique pour filtrer par catégorie sélectionnée
 function filterAndSort() {
   const searchValue = searchInput.value.toLowerCase();
   const sellerValue = sellerSelect.value;
+  const categoryValue = categorySelect.value; // Nouvelle valeur sélectionnée
   
   let filtered = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchValue);
     const matchesSeller = (sellerValue === "all") || (product.seller === sellerValue);
-    return matchesSearch && matchesSeller;
+    
+    // Vérification de la catégorie (insensible à la casse au cas où)
+    const matchesCategory = (categoryValue === "all") || (product.category.toUpperCase() === categoryValue.toUpperCase());
+    
+    return matchesSearch && matchesSeller && matchesCategory;
   });
-
-  const sort = sortSelect.value;
-  if (sort === "az") {
-    filtered.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sort === "za") {
-    filtered.sort((a, b) => b.name.localeCompare(a.name));
-  }
 
   renderProducts(filtered);
 }
 
 searchInput.addEventListener("input", filterAndSort);
 sellerSelect.addEventListener("change", filterAndSort);
-sortSelect.addEventListener("change", filterAndSort);
+categorySelect.addEventListener("change", filterAndSort); // Écouteur d'événement mis à jour
 
 loadData();
 
@@ -768,6 +776,7 @@ function closePopup() {
 }
 </script>
 
+<!-- Code Popup BBD en bas -->
 <div id="popupBBD" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
   <div style="background: #121212; color: white; width: 85%; max-width: 320px; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid #2eaadc; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
     <button onclick="closePopup()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #9ca3af; font-size: 22px; cursor: pointer; transition: 0.2s; z-index: 10000;">✕</button>
