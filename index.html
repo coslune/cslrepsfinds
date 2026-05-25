@@ -59,7 +59,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Barre supérieure (Topbar) */
+    /* Barre supérieure (Topbar) - Reste en haut sur PC, défile sur Mobile */
     .topbar {
       position: sticky;
       top: 0;
@@ -123,7 +123,6 @@
       border-color: var(--text); 
     }
 
-    /* Ajustement de la taille de l'image interne */
     .social-btn img {
       width: 100%;
       height: 100%;
@@ -142,6 +141,11 @@
 
     .search-wrapper {
       position: relative;
+    }
+
+    /* Nouvelle barre de recherche collante uniquement pour Mobile */
+    .mobile-search-bar {
+      display: none; /* Cachée sur PC */
     }
 
     input, select, button {
@@ -403,9 +407,13 @@
       to { opacity: 1; }
     }
 
-    /* Modifications Responsive Mobile Centrées */
+    /* Modifications Responsive Mobile MODIFIÉES ICI */
     @media (max-width: 768px) {
       .topbar {
+        position: absolute; /* Reste tout en haut de la page, ne suit plus le défilement */
+        top: 0;
+        left: 0;
+        width: 100%;
         flex-direction: column;
         align-items: center;
         padding: 16px 12px;
@@ -424,19 +432,41 @@
         width: 100%;
         justify-content: center;
       }
+      
+      /* On cache la zone de recherche classique dans la topbar mobile */
+      .topbar .actions .search-wrapper {
+        display: none;
+      }
+      
       .actions {
         width: 100%;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
       }
-      .search-wrapper {
+      
+      /* Style de la nouvelle barre de recherche collante sur Mobile */
+      .mobile-search-bar {
+        display: block;
+        position: sticky;
+        top: 0;
+        z-index: 9;
+        backdrop-filter: blur(12px);
+        background: rgba(25, 25, 25, 0.9);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 12px;
         width: 100%;
       }
-      input, select {
-        width: 100%;
+      body.light .mobile-search-bar {
+        background: rgba(255, 255, 255, 0.9);
       }
+      .mobile-search-bar input {
+        width: 100%;
+        padding: 8px 12px;
+      }
+
+      /* Pour décaler le contenu pour pas qu'il soit caché sous l'en-tête absolue au départ */
       main {
-        padding: 16px 12px;
+        padding: 240px 12px 16px 12px; 
       }
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -482,22 +512,18 @@
     </div>
     
     <div class="social-links">
-      <!-- Discord -->
       <a href="https://discord.gg/xN6eeesfD" target="_blank" class="social-btn discord" title="Rejoindre le Discord">
         <img src="https://th.bing.com/th/id/OIP.EZkdm25nbQDs_PjFN8hmewHaHa?w=179&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Discord">
       </a>
 
-      <!-- Telegram -->
       <a href="https://t.me/+c6FdBetY4TQ5Zjdk" target="_blank" class="social-btn telegram" title="Rejoindre le Telegram">
         <img src="https://th.bing.com/th/id/OIP.RoaeSbQ4aLaB6ifctJ5eBAHaHa?w=179&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Telegram">
       </a>
 
-      <!-- TikTok -->
       <a href="https://www.tiktok.com/@bbdbuyxyou?is_from_webapp=1&sender_device=pc" target="_blank" class="social-btn tiktok" title="Nous suivre sur TikTok">
         <img src="https://th.bing.com/th/id/OIP.hG2pQRJiUa9gxkLFPQy6tQHaHa?w=170&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="TikTok">
       </a>
 
-      <!-- BbdBuy -->
       <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" class="social-btn bbd-nav" title="S'inscrire sur BbdBuy">
         <img src="https://th.bing.com/th/id/OIP.-ykdS5LGPrH4ftZI26C9iAHaHa?w=166&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="BbdBuy">
       </a>
@@ -513,7 +539,6 @@
       <option value="all">Tous les vendeurs</option>
     </select>
 
-    <!-- CORRECTION ICI : Remplacement du tri par le filtre de catégories personnalisées -->
     <select id="categorySelect">
       <option value="all">Toutes les catégories</option>
       <option value="PULL">PULL</option>
@@ -527,6 +552,10 @@
     <button id="themeToggle" title="Changer le thème">🌙</button>
   </div>
 </header>
+
+<div class="mobile-search-bar">
+  <input type="text" id="mobileSearchInput" placeholder="🔍 Rechercher un produit..." />
+</div>
 
 <main>
   <div id="categoryContainer"></div>
@@ -549,8 +578,9 @@
 const categoryContainer = document.getElementById("categoryContainer");
 const template = document.getElementById("productTemplate");
 const searchInput = document.getElementById("searchInput");
+const mobileSearchInput = document.getElementById("mobileSearchInput"); // Ajouté pour Mobile
 const sellerSelect = document.getElementById("sellerSelect");
-const categorySelect = document.getElementById("categorySelect"); // Mis à jour
+const categorySelect = document.getElementById("categorySelect"); 
 const themeToggle = document.getElementById("themeToggle");
 
 const productPopup = document.getElementById("productPopup");
@@ -731,17 +761,22 @@ function renderProducts(data) {
   });
 }
 
-// CORRECTION ICI : Ajustement de la logique pour filtrer par catégorie sélectionnée
-function filterAndSort() {
+// Nouvelle logique pour synchroniser la recherche PC et Mobile
+function filterAndSort(e) {
+  // Si on tape sur mobile, on synchronise la valeur sur PC, et inversement
+  if (e && e.target === mobileSearchInput) {
+    searchInput.value = mobileSearchInput.value;
+  } else if (e && e.target === searchInput) {
+    mobileSearchInput.value = searchInput.value;
+  }
+
   const searchValue = searchInput.value.toLowerCase();
   const sellerValue = sellerSelect.value;
-  const categoryValue = categorySelect.value; // Nouvelle valeur sélectionnée
+  const categoryValue = categorySelect.value; 
   
   let filtered = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchValue);
     const matchesSeller = (sellerValue === "all") || (product.seller === sellerValue);
-    
-    // Vérification de la catégorie (insensible à la casse au cas où)
     const matchesCategory = (categoryValue === "all") || (product.category.toUpperCase() === categoryValue.toUpperCase());
     
     return matchesSearch && matchesSeller && matchesCategory;
@@ -751,8 +786,9 @@ function filterAndSort() {
 }
 
 searchInput.addEventListener("input", filterAndSort);
+mobileSearchInput.addEventListener("input", filterAndSort); // Ajouté pour Mobile
 sellerSelect.addEventListener("change", filterAndSort);
-categorySelect.addEventListener("change", filterAndSort); // Écouteur d'événement mis à jour
+categorySelect.addEventListener("change", filterAndSort); 
 
 loadData();
 
@@ -776,7 +812,6 @@ function closePopup() {
 }
 </script>
 
-<!-- Code Popup BBD en bas -->
 <div id="popupBBD" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
   <div style="background: #121212; color: white; width: 85%; max-width: 320px; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid #2eaadc; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
     <button onclick="closePopup()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #9ca3af; font-size: 22px; cursor: pointer; transition: 0.2s; z-index: 10000;">✕</button>
