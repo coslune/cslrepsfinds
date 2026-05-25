@@ -44,7 +44,60 @@
       --bg-seller: #dbeafe;
       --text-seller: #1e40af;
     }
+/* Alignement du titre et des réseaux à gauche */
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
+/* Conteneur des réseaux */
+.social-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Style de base des boutons de réseaux */
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+}
+
+.social-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Couleurs personnalisées au survol */
+.social-btn.discord:hover { background: #5865F2; color: white; border-color: #5865F2; }
+.social-btn.telegram:hover { background: #0088cc; color: white; border-color: #0088cc; }
+.social-btn.tiktok:hover { background: #000000; color: white; border-color: #333; }
+body.light .social-btn.tiktok:hover { background: #000000; }
+.social-btn.bbd-nav:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Ajustement Mobile pour que tout reste aligné */
+@media (max-width: 768px) {
+  .brand-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .social-links {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
     * {
       margin: 0;
       padding: 0;
