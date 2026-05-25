@@ -45,55 +45,6 @@
       --text-seller: #1e40af;
     }
 
-    /* ---- STYLES RESEAUX SOCIAUX NAVBAR ---- */
-    .brand-container {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .social-links {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-   .social-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px; /* Légèrement agrandi pour mieux voir l'image */
-      height: 36px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-      border: 2px solid var(--accent); /* Bordure plus épaisse avec la couleur accentuée */
-      background: var(--input-bg);
-      overflow: hidden; /* Évite que l'image dépasse du carré */
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Ombre pour donner du relief */
-    }
-
-    /* Ajustement pour que tes images d'icônes remplissent bien le carré */
-    .social-btn img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .social-btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .social-btn svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* Couleurs au survol spécifiques aux réseaux */
-    .social-btn.discord:hover { background: #5865F2; color: white; border-color: #5865F2; }
-    .social-btn.telegram:hover { background: #0088cc; color: white; border-color: #0088cc; }
-    .social-btn.tiktok:hover { background: #000000; color: white; border-color: #333; }
-    body.light .social-btn.tiktok:hover { background: #000000; }
-    .social-btn.bbd-nav:hover { background: #ffaa00; color: white; border-color: #ffaa00; }
-
     * {
       margin: 0;
       padding: 0;
@@ -108,7 +59,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Barre supérieure (Topbar) */
+    /* Barre supérieure (Topbar) agrandie */
     .topbar {
       position: sticky;
       top: 0;
@@ -120,7 +71,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 20px;
-      padding: 12px 24px;
+      padding: 20px 24px; /* Élargie pour donner plus de hauteur */
     }
 
     body.light .topbar {
@@ -137,6 +88,46 @@
       color: var(--muted);
       font-size: 0.8rem;
       margin-top: 2px;
+    }
+
+    /* ---- STYLES RESEAUX SOCIAUX NAVBAR AGRANDIS ET SUPERS VISIBLES ---- */
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;  /* Grands carrés parfaits */
+      height: 48px; 
+      border-radius: 8px; /* Angles légèrement adoucis */
+      transition: all 0.2s ease;
+      border: 2px solid var(--accent); /* Bordure épaisse et flashy */
+      background: var(--input-bg);
+      overflow: hidden; /* Empêche les images de déborder */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Ombre marquée pour le relief */
+    }
+
+    .social-btn:hover {
+      transform: translateY(-3px) scale(1.05); /* Effet dynamique au survol */
+      border-color: var(--text); /* La bordure s'illumine en blanc/noir au survol */
+    }
+
+    /* Remplissage parfait des images d'icônes dans les carrés */
+    .social-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     /* Zone des Actions (Filtres, Recherche, Thème) */
@@ -238,7 +229,7 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.05);
     }
 
-    /* Galerie photos - FORCÉ EN CARRÉ PARFAIT */
+    /* Galerie photos - EN CARRÉ PARFAIT */
     .product-images {
       display: flex;
       overflow-x: auto;
@@ -247,7 +238,7 @@
       background: rgba(0,0,0,0.02);
       border-bottom: 1px solid var(--border);
       width: 100%;
-      aspect-ratio: 1 / 1; /* Force le conteneur à être un carré parfait */
+      aspect-ratio: 1 / 1;
     }
 
     .product-images::-webkit-scrollbar {
@@ -258,7 +249,7 @@
       width: 100%;
       min-width: 100%;
       height: 100%;
-      object-fit: cover; /* Remplissage intelligent sans déformation */
+      object-fit: cover;
       scroll-snap-align: start;
     }
 
@@ -336,32 +327,29 @@
 
     .popup-card p {
       color: var(--muted);
-     <div class="social-links">
-      <!-- Discord -->
-      <a href="https://discord.gg/xN6eeesfD" target="_blank" class="social-btn discord" title="Rejoindre le Discord">
-        <img src="URL_DE_TON_IMAGE_DISCORD_ICI" alt="Discord">
-      </a>
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
 
-      <!-- Telegram -->
-      <a href="https://t.me/+c6FdBetY4TQ5Zjdk" target="_blank" class="social-btn telegram" title="Rejoindre le Telegram">
-        <img src="URL_DE_TON_IMAGE_TELEGRAM_ICI" alt="Telegram">
-      </a>
+    .popup-card .popup-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
 
-      <!-- TikTok -->
-      <a href="https://www.tiktok.com/@bbdbuyxyou?is_from_webapp=1&sender_device=pc" target="_blank" class="social-btn tiktok" title="Nous suivre sur TikTok">
-        <img src="URL_DE_TON_IMAGE_TIKTOK_ICI" alt="TikTok">
-      </a>
-
-      <!-- BbdBuy -->
-      <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" class="social-btn bbd-nav" title="S'inscrire sur BbdBuy">
-        <img src="https://th.bing.com/th/id/OIP.-ykdS5LGPrH4ftZI26C9iAHaHa?w=166&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="BbdBuy">
-      </a>
-    </div>
+    .popup-links-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .popup-btn {
       width: 100%;
-     <img src="https://th.bing.com/th/id/OIP.-ykdS5LGPrH4ftZI26C9iAHaHa?w=166&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="BbdBuy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+      text-decoration: none;
       padding: 12px;
       border-radius: 6px;
       font-size: 0.9rem;
@@ -416,13 +404,13 @@
       .topbar {
         flex-direction: column;
         align-items: stretch;
-        padding: 12px;
+        padding: 16px 12px;
         gap: 12px;
       }
       .brand-container {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+        gap: 12px;
       }
       .social-links {
         width: 100%;
@@ -489,19 +477,22 @@
     <div class="social-links">
       <!-- Discord -->
       <a href="https://discord.gg/xN6eeesfD" target="_blank" class="social-btn discord" title="Rejoindre le Discord">
-        <svg viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.71-11,68.6,68.6,0,0,1-10.57-5c.87-.64,1.72-1.31,2.53-2a75.7,75.7,0,0,0,65.66,0c.81.7,1.66,1.37,2.53,2a68.6,68.6,0,0,1-10.57,5,74.37,74.37,0,0,0,6.71,11,105.73,105.73,0,0,0,31-18.83C129.93,50.54,124.08,27.75,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/></svg>
+        <img src="URL_DE_TON_IMAGE_DISCORD_ICI" alt="Discord">
       </a>
+
       <!-- Telegram -->
       <a href="https://t.me/+c6FdBetY4TQ5Zjdk" target="_blank" class="social-btn telegram" title="Rejoindre le Telegram">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+        <img src="URL_DE_TON_IMAGE_TELEGRAM_ICI" alt="Telegram">
       </a>
+
       <!-- TikTok -->
       <a href="https://www.tiktok.com/@bbdbuyxyou?is_from_webapp=1&sender_device=pc" target="_blank" class="social-btn tiktok" title="Nous suivre sur TikTok">
-        <svg viewBox="0 0 448 512" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a72.43,72.43,0,1,0,40.3,65V0h89.9a111.45,111.45,0,0,0,14.6,56.89,112.11,112.11,0,0,0,51,41.6V188.31A111.11,111.11,0,0,0,448,209.91Z"/></svg>
+        <img src="URL_DE_TON_IMAGE_TIKTOK_ICI" alt="TikTok">
       </a>
+
       <!-- BbdBuy -->
       <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" class="social-btn bbd-nav" title="S'inscrire sur BbdBuy">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <img src="URL_DE_TON_IMAGE_BBDBUY_ICI" alt="BbdBuy">
       </a>
     </div>
   </div>
