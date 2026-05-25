@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catalogue Produits</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Variables de design - Style Notion / Airtable (Sombre par défaut) */
+    :root {
+      --bg: #191919;
+      --card: #202020;
+      --border: #2f2f2f;
+      --text: #f4f4f5;
+      --muted: #9ca3af;
+      --accent: #2eaadc;
+      --accent-hover: #1c99c6;
+      --bg-tag: rgba(46, 170, 220, 0.15);
+      --text-tag: #7dd3fc;
+      --input-bg: #252525;
+    }
+
+    /* Thème Clair - Style Notion Pur */
+    body.light {
+      --bg: #ffffff;
+      --card: #fbfbfa;
+      --border: #edece9;
+      --text: #37352f;
+      --muted: #787774;
+      --accent: #2383e2;
+      --accent-hover: #1a66b8;
+      --bg-tag: #e8f4fe;
+      --text-tag: #1d72d6;
+      --input-bg: #f4f3f0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background 0.2s ease, color 0.2s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Barre supérieure (Topbar) */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(25, 25, 25, 0.85);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 16px 24px;
+    }
+
+    body.light .topbar {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .brand h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 2px;
+    }
+
+    /* Zone des Actions (Filtres, Recherche, Thème) */
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    input, select, button {
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      border-radius: 6px; /* Coins plus stricts style Notion */
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    button {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+    }
+
+    #themeToggle {
+      padding: 8px 12px;
+    }
+
+    /* Conteneur principal */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* Sections par Catégorie */
+    .category-section {
+      margin-bottom: 48px;
+    }
+
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .category-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Grille de produits style Airtable / Dashboard */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* Carte Produit */
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    }
+
+    body.light .product-card:hover {
+      box-shadow: 0 10px 20px rgba(0,0,0,0.04);
+    }
+
+    /* Galerie photos horizontale épurée */
+    .product-images {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none; /* Cache la barre sur Firefox */
+      background: rgba(0,0,0,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .product-images::-webkit-scrollbar {
+      display: none; /* Cache la barre sur Chrome/Safari */
+    }
+
+    .product-images img {
+      width: 100%;
+      min-width: 100%;
+      height: 240px;
+      object-fit: cover;
+      scroll-snap-align: start;
+    }
+
+    /* Contenu de la carte */
+    .product-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .product-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    /* Tag de catégorie */
+    .product-category {
+      align-self: flex-start;
+      margin-bottom: 16px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--bg-tag);
+      color: var(--text-tag);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Liens d'action style Spreadsheet boutonné */
+    .product-links {
+      display: flex;
+      gap: 8px;
+      margin-top: auto; /* Aligne les boutons en bas */
+    }
+
+    .product-links a {
+      flex: 1;
+      text-align: center;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .product-links .bbd-link {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .product-links .bbd-link:hover {
+      background: var(--accent-hover);
+    }
+
+    .product-links .weidian-link {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .product-links .weidian-link:hover {
+      background: var(--input-bg);
+    }
+
+    /* Popup TikTok Moderne */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .popup-card {
+      width: 90%;
+      max-width: 400px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .popup-card h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .popup-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .popup-card strong {
+      color: var(--text);
+    }
+
+    .popup-card button {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px;
+      font-weight: 600;
+    }
+
+    .popup-card button:hover {
+      background: var(--accent-hover);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Responsive Mobile */
+    @media (max-width: 768px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+        gap: 16px;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .search-wrapper {
+        flex-grow: 1;
+      }
+
+      input {
+        width: 100%;
+      }
+
+      main {
+        padding: 24px 16px;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr; /* Une seule colonne sur mobile pour un scroll propre */
+        gap: 16px;
+      }
+      
+      .product-images img {
+        height: 280px; /* Plus grand format d'image sur mobile */
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="tiktokPopup" class="popup-overlay hidden">
+  <div class="popup-card">
+    <h2>Ouvre le site dans ton navigateur</h2>
+    <p>
+      Pour une meilleure expérience, ouvre ce site via les <strong>3 petits points</strong> de TikTok puis cliquez sur <strong>“Ouvrir dans le navigateur”</strong>.
+    </p>
+    <button id="closePopup">Compris</button>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>Catalogue Produits</h1>
+    <p>Catalogue dynamique depuis TXT</p>
+  </div>
+
+  <div class="actions">
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" placeholder="Rechercher un produit..." />
+    </div>
+
+    <select id="sortSelect">
+      <option value="default">Tri par défaut</option>
+      <option value="az">Nom : A → Z</option>
+      <option value="za">Nom : Z → A</option>
+    </select>
+
+    <button id="themeToggle" title="Changer le thème">🌙</button>
+  </div>
+</header>
+
+<main>
+  <div id="categoryContainer"></div>
+</main>
+
+<template id="productTemplate">
+  <div class="product-card">
+    <div class="product-images"></div>
+    <div class="product-content">
+      <h3 class="product-title"></h3>
+      <span class="product-category"></span>
+      <div class="product-links">
+        <a class="bbd-link" target="_blank">BBD</a>
+        <a class="weidian-link" target="_blank">Weidian</a>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+const categoryContainer = document.getElementById("categoryContainer");
+const template = document.getElementById("productTemplate");
+const searchInput = document.getElementById("searchInput");
+const sortSelect = document.getElementById("sortSelect");
+const themeToggle = document.getElementById("themeToggle");
+
+let products = [];
+
+// -------- TikTok Detection (Affichage unique) --------
+(function detectTikTokBrowser() {
+  const alreadySeen = localStorage.getItem("tiktokPopupSeen");
+  if (alreadySeen) return;
+
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const isTikTok = ua.includes("TikTok") || ua.includes("musical_ly");
+
+  if (isTikTok) {
+    const popup = document.getElementById("tiktokPopup");
+    popup.classList.remove("hidden");
+
+    document.getElementById("closePopup").addEventListener("click", () => {
+      popup.classList.add("hidden");
+      localStorage.setItem("tiktokPopupSeen", "true");
+    });
+  }
+})();
+
+// -------- Gestion du Thème (Dark par défaut) --------
+(function loadTheme() {
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") {
+    document.body.classList.add("light");
+    themeToggle.textContent = "☀️";
+  } else {
+    themeToggle.textContent = "🌙";
+  }
+})();
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("light");
+  const isLight = document.body.classList.contains("light");
+  themeToggle.textContent = isLight ? "☀️" : "🌙";
+  localStorage.setItem("theme", isLight ? "light" : "dark");
+});
+
+// -------- Chargement et parsing des fichiers TXT --------
+async function loadData() {
+  try {
+    const categoriesText = await fetch("categorie.txt").then(res => res.text());
+    const productsText = await fetch("Produit.txt").then(res => res.text());
+
+    // Récupération des catégories valides commençant par "/"
+    const categories = categoriesText
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line => line.startsWith("/"))
+      .map(line => line.replace("/", "").trim());
+
+    parseProducts(productsText, categories);
+    renderProducts(products);
+  } catch (err) {
+    console.error("Erreur lors du chargement des fichiers TXT :", err);
+  }
+}
+
+function parseProducts(text, validCategories) {
+  const blocks = text
+    .split("/")
+    .map(block => block.trim())
+    .filter(Boolean);
+
+  products = [];
+
+  blocks.forEach(block => {
+    const lines = block
+      .split("\n")
+      .map(l => l.trim())
+      .filter(Boolean);
+
+    if (lines.length < 5) return;
+
+    const category = lines[0];
+    const name = lines[1];
+    const images = lines[2].split(",").map(img => img.trim()).filter(Boolean);
+    const bbd = lines[3];
+    const weidian = lines[4];
+
+    // Vérifie si la catégorie du produit est présente dans categorie.txt
+    if (!validCategories.includes(category)) return;
+
+    products.push({ category, name, images, bbd, weidian });
+  });
+}
+
+// -------- Rendu HTML des Produits --------
+function renderProducts(data) {
+  categoryContainer.innerHTML = "";
+  const grouped = {};
+
+  // Groupement des éléments par catégorie
+  data.forEach(product => {
+    if (!grouped[product.category]) {
+      grouped[product.category] = [];
+    }
+    grouped[product.category].push(product);
+  });
+
+  // Construction de l'affichage par section
+  Object.keys(grouped).forEach(category => {
+    const section = document.createElement("section");
+    section.className = "category-section";
+
+    const title = document.createElement("h2");
+    title.className = "category-title";
+    title.textContent = category;
+
+    const grid = document.createElement("div");
+    grid.className = "products-grid";
+
+    grouped[category].forEach(product => {
+      const clone = template.content.cloneNode(true);
+
+      clone.querySelector(".product-title").textContent = product.name;
+      clone.querySelector(".product-category").textContent = product.category;
+      clone.querySelector(".bbd-link").href = product.bbd;
+      clone.querySelector(".weidian-link").href = product.weidian;
+
+      const imagesContainer = clone.querySelector(".product-images");
+
+      product.images.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.loading = "lazy"; // Optimisation des performances de chargement
+        imagesContainer.appendChild(img);
+      });
+
+      grid.appendChild(clone);
+    });
+
+    section.appendChild(title);
+    section.appendChild(grid);
+    categoryContainer.appendChild(section);
+  });
+}
+
+// -------- Système de Recherche et de Tri --------
+function filterAndSort() {
+  const value = searchInput.value.toLowerCase();
+  let filtered = products.filter(product =>
+    product.name.toLowerCase().includes(value)
+  );
+
+  const sort = sortSelect.value;
+  if (sort === "az") {
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sort === "za") {
+    filtered.sort((a, b) => b.name.localeCompare(a.name));
+  }
+
+  renderProducts(filtered);
+}
+
+searchInput.addEventListener("input", filterAndSort);
+sortSelect.addEventListener("change", filterAndSort);
+
+// Lancement de l'application
+loadData();
+</script>
+
+</body>
+</html>
