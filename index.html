@@ -22,13 +22,11 @@
       --bg-tag: rgba(46, 170, 220, 0.15);
       --text-tag: #7dd3fc;
       --input-bg: #252525;
-      
-      /* Couleur pour le tag vendeur bleu */
       --bg-seller: rgba(37, 99, 235, 0.2);
       --text-seller: #60a5fa;
     }
 
-    /* Thème Clair - Style Notion Pur */
+    /* Thème Clair */
     body.light {
       --bg: #ffffff;
       --card: #fbfbfa;
@@ -40,7 +38,6 @@
       --bg-tag: #e8f4fe;
       --text-tag: #1d72d6;
       --input-bg: #f4f3f0;
-      
       --bg-seller: #dbeafe;
       --text-seller: #1e40af;
     }
@@ -59,7 +56,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Barre supérieure (Topbar) */
     .topbar {
       position: sticky;
       top: 0;
@@ -90,7 +86,6 @@
       margin-top: 2px;
     }
 
-    /* Zone des Actions (Filtres, Recherche, Thème) */
     .actions {
       display: flex;
       gap: 10px;
@@ -129,14 +124,12 @@
       padding: 6px 10px;
     }
 
-    /* Conteneur principal */
     main {
       max-width: 1500px;
       margin: 0 auto;
       padding: 24px 24px;
     }
 
-    /* Sections par Catégorie */
     .category-section {
       margin-bottom: 36px;
     }
@@ -160,14 +153,12 @@
       background: var(--border);
     }
 
-    /* Grille de produits beaucoup plus compacte (Mini-Cartes) */
     .products-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 12px;
     }
 
-    /* Carte Produit - Cliquable et épurée */
     .product-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -189,7 +180,6 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.05);
     }
 
-    /* Galerie photos compacte */
     .product-images {
       display: flex;
       overflow-x: auto;
@@ -209,9 +199,9 @@
       height: 140px;
       object-fit: cover;
       scroll-snap-align: start;
+      pointer-events: none; /* Correction : Le clic traverse l'image */
     }
 
-    /* Contenu condensé de la carte */
     .product-content {
       padding: 10px;
       display: flex;
@@ -229,14 +219,12 @@
       text-overflow: ellipsis;
     }
 
-    /* Groupement des tags côte à côte */
     .product-tags {
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
     }
 
-    /* Tag de catégorie */
     .product-category {
       padding: 2px 6px;
       border-radius: 4px;
@@ -246,7 +234,6 @@
       font-weight: 600;
     }
 
-    /* Tag de vendeur (Bleu) */
     .product-seller {
       padding: 2px 6px;
       border-radius: 4px;
@@ -256,7 +243,6 @@
       font-weight: 600;
     }
 
-    /* Design des Overlays / Popups */
     .popup-overlay {
       position: fixed;
       inset: 0;
@@ -302,7 +288,6 @@
       gap: 6px;
     }
 
-    /* Container de liens de la popup produit */
     .popup-links-container {
       display: flex;
       flex-direction: column;
@@ -522,8 +507,10 @@ themeToggle.addEventListener("click", () => {
 
 // -------- Gestion Ouverture de la Popup Produit --------
 function openLinksPopup(product) {
-  popupProductTitle.textContent = product.name;
-  popupProductCategory.textContent = `Catégorie : ${product.category}`;
+  if (!product) return;
+
+  popupProductTitle.textContent = product.name || "Produit sans nom";
+  popupProductCategory.textContent = `Catégorie : ${product.category || "Non classé"}`;
   
   if (product.seller) {
     popupProductSeller.textContent = `• Vendeur : ${product.seller}`;
@@ -532,8 +519,34 @@ function openLinksPopup(product) {
     popupProductSeller.classList.add("hidden");
   }
   
-  popupBbdLink.href = product.bbd;
-  popupWeidianLink.href = product.weidian;
+  popupBbdLink.href = product.bbd || "#";
+  popupWeidianLink.href = product.weidian || "#";
+  
+  popupBbdLink.onclick = null;
+  popupWeidianLink.onclick = null;
+
+  // Envoi propre à Google Tag Manager sans utiliser "gtag"
+  if (window.dataLayer) {
+    window.dataLayer.push({
+      'event': 'view_product',
+      'product_name': product.name,
+      'product_category': product.category
+    });
+
+    popupBbdLink.onclick = () => {
+      window.dataLayer.push({
+        'event': 'click_lien_bbd',
+        'product_name': product.name
+      });
+    };
+
+    popupWeidianLink.onclick = () => {
+      window.dataLayer.push({
+        'event': 'click_lien_weidian',
+        'product_name': product.name
+      });
+    };
+  }
   
   productPopup.classList.remove("hidden");
 }
@@ -550,14 +563,12 @@ async function loadData() {
     const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => res.text());
     const productsText = await fetch("Produit.txt?t=" + Date.now()).then(res => res.text());
     
-    // Chargement optionnel du fichier vendeur.txt
     let sellers = [];
     try {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
       const cleanSellersText = sellersText.replace(/[\r\n]/g, "").trim();
       sellers = cleanSellersText.split("#").map(s => s.trim()).filter(Boolean);
       
-      // Remplissage dynamique du menu de sélection des vendeurs
       sellers.forEach(seller => {
         const option = document.createElement("option");
         option.value = seller;
@@ -598,12 +609,10 @@ function parseProducts(text, validCategories, validSellers) {
     const bbd = infos[3];
     const weidian = infos[4];
     
-    // Le 6ème élément (vendeur) est optionnel
     let seller = infos[5] || "";
     
-    // Sécurité de filtrage : si un fichier vendeur existe et qu'il y a un vendeur, on vérifie la cohérence
     if (validSellers.length > 0 && seller && !validSellers.includes(seller)) {
-      seller = ""; // réinitialise s'il n'est pas déclaré dans vendeur.txt
+      seller = ""; 
     }
 
     if (!validCategories.includes(category)) return;
@@ -645,7 +654,6 @@ function renderProducts(data) {
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
 
-      // Gestion de l'affichage dynamique du tag vendeur en bleu
       const sellerTag = clone.querySelector(".product-seller");
       if (product.seller) {
         sellerTag.textContent = product.seller;
@@ -676,14 +684,12 @@ function filterAndSort() {
   const searchValue = searchInput.value.toLowerCase();
   const sellerValue = sellerSelect.value;
   
-  // 1. Filtrage combiné (Recherche textuelle + Menu vendeur)
   let filtered = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchValue);
     const matchesSeller = (sellerValue === "all") || (product.seller === sellerValue);
     return matchesSearch && matchesSeller;
   });
 
-  // 2. Tri alphabétique
   const sort = sortSelect.value;
   if (sort === "az") {
     filtered.sort((a, b) => a.name.localeCompare(b.name));
