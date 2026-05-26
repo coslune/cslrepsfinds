@@ -997,23 +997,26 @@ async function loadData() {
     const blocks = productsText.replace(/[\r\n]/g, "").trim().split("##").map(b => b.trim()).filter(Boolean);
     products = [];
 
-    blocks.forEach(block => {
+blocks.forEach(block => {
       const infos = block.split("#").map(i => i.trim());
-      if (infos.length < 5) return;
       
-      let category = infos[0], name = infos[1], price = "", images = [], bbd = "", weidian = "", seller = "";
+      // Si la ligne est trop courte (moins de 4 éléments), on ignore
+      if (infos.length < 4) return;
       
-      if (infos.length >= 7) {
-        price = infos[2];
-        images = infos[3].split(",").map(img => img.trim()).filter(Boolean);
-        bbd = infos[4]; weidian = infos[5]; seller = infos[6] || "";
-      } else {
-        images = infos[2].split(",").map(img => img.trim()).filter(Boolean);
-        bbd = infos[3]; weidian = infos[4]; seller = infos[5] || "";
-      }
+      // On affecte les variables de manière sécurisée
+      // 0: Cat, 1: Nom, 2: Prix, 3: Images, 4: BBD, 5: Weidian, 6: Vendeur (Optionnel)
+      let category = infos[0];
+      let name = infos[1];
+      let price = infos[2] || "";
+      let images = infos[3] ? infos[3].split(",").map(img => img.trim()).filter(Boolean) : [];
+      let bbd = infos[4] || "";
+      let weidian = infos[5] || "";
+      // Si le 7ème élément n'existe pas, on met une chaîne vide au lieu d'un bug
+      let seller = infos[6] || ""; 
       
       if (!validCategories.includes(category)) return;
-      products.push({ category, name, price: price || null, images, bbd, weidian, seller });
+      
+      products.push({ category, name, price, images, bbd, weidian, seller });
     });
 
     renderProducts(products);
