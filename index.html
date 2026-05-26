@@ -244,19 +244,18 @@
     }
 
     .price-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px; /* On remet à gauche */
-  background: var(--success);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  z-index: 5;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  pointer-events: none; /* Ajouté pour ne pas gêner le clic sur la carte */
-}
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--success);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      z-index: 5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
 
     .product-images {
       display: flex;
@@ -977,15 +976,16 @@ function openLinksPopup(product) {
 closeProductPopup.addEventListener("click", () => { productPopup.classList.add("hidden"); });
 productPopup.addEventListener("click", (e) => { if (e.target === productPopup) productPopup.classList.add("hidden"); });
 
+// Parser & Rendu
 async function loadData() {
   try {
     const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => res.text());
     const productsText = await fetch("Produit.txt?t=" + Date.now()).then(res => res.text());
     
-    // Chargement des vendeurs
+    let sellers = [];
     try {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
-      const sellers = sellersText.replace(/[\r\n]/g, "").trim().split("#").map(s => s.trim()).filter(Boolean);
+      sellers = sellersText.replace(/[\r\n]/g, "").trim().split("#").map(s => s.trim()).filter(Boolean);
       sellers.forEach(seller => {
         const option = document.createElement("option");
         option.value = seller; option.textContent = seller; sellerSelect.appendChild(option);
@@ -994,32 +994,31 @@ async function loadData() {
 
     const validCategories = categoriesText.replace(/[\r\n]/g, "").trim().split("#").map(cat => cat.trim()).filter(Boolean);
     
-    // Nettoyage et découpage des produits
-    const blocks = productsText.split("##").map(b => b.trim()).filter(Boolean);
+    const blocks = productsText.replace(/[\r\n]/g, "").trim().split("##").map(b => b.trim()).filter(Boolean);
     products = [];
 
     blocks.forEach(block => {
       const infos = block.split("#").map(i => i.trim());
-      // On vérifie qu'on a bien assez d'infos (7 éléments attendus : Cat, Nom, Prix, Image, BBD, Weidian, Vendeur)
-      if (infos.length < 6) return; 
+      if (infos.length < 5) return;
       
-      const product = {
-        const categorie = infos[0];
-const nom = infos[1];
-const image = infos[2]; // Tout se décale d'un cran
-const lienBBD = infos[3];
-const lienWeidian = infos[4];
-const vendeur = infos[5];
-      };
+      let category = infos[0], name = infos[1], price = "", images = [], bbd = "", weidian = "", seller = "";
       
-      if (validCategories.includes(product.category)) {
-        products.push(product);
+      if (infos.length >= 7) {
+        price = infos[2];
+        images = infos[3].split(",").map(img => img.trim()).filter(Boolean);
+        bbd = infos[4]; weidian = infos[5]; seller = infos[6] || "";
+      } else {
+        images = infos[2].split(",").map(img => img.trim()).filter(Boolean);
+        bbd = infos[3]; weidian = infos[4]; seller = infos[5] || "";
       }
+      
+      if (!validCategories.includes(category)) return;
+      products.push({ category, name, price: price || null, images, bbd, weidian, seller });
     });
 
     renderProducts(products);
   } catch (err) {
-    console.error("Erreur chargement des données :", err);
+    console.error("Erreur chargement", err);
   }
 }
 
