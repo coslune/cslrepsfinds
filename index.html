@@ -394,7 +394,7 @@
       font-size: 0.85rem;
       color: var(--muted);
       font-weight: 500;
-      text-transform: uppercase;
+      text-transform: uppercase
       letter-spacing: 0.05em;
     }
 
@@ -1084,9 +1084,14 @@ function filterAndSort(e) {
   const categoryValue = categorySelect.value; 
   
   let filtered = products.filter(p => {
-    return p.name.toLowerCase().includes(searchLower) && 
-           (sellerValue === "all" || p.seller === sellerValue) &&
-           (categoryValue === "all" || p.category.toUpperCase() === categoryValue.toUpperCase());
+    const matchesName = p.name.toLowerCase().includes(searchLower);
+    const matchesCategory = (categoryValue === "all" || p.category.toUpperCase() === categoryValue.toUpperCase());
+    
+    // Logique corrigée : si "all" est sélectionné, on affiche tout. 
+    // Sinon, on vérifie si le vendeur correspond OU s'il est vide (pas de vendeur)
+    const matchesSeller = (sellerValue === "all") || (p.seller === sellerValue) || (sellerValue === "Sans vendeur" && !p.seller);
+    
+    return matchesName && matchesCategory && matchesSeller;
   });
   renderProducts(filtered);
 }
