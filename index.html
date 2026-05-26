@@ -998,20 +998,22 @@ async function loadData() {
     const blocks = productsText.replace(/[\r\n]/g, "").trim().split("##").map(b => b.trim()).filter(Boolean);
     products = [];
 
-    blocks.forEach(block => {
+   blocks.forEach(block => {
       const infos = block.split("#").map(i => i.trim());
-      if (infos.length < 5) return;
+      // On demande au moins 6 éléments (catégorie, nom, prix, images, bbd, weidian)
+      if (infos.length < 6) return; 
       
-      let category = infos[0], name = infos[1], price = "", images = [], bbd = "", weidian = "", seller = "";
+      let category = infos[0];
+      let name = infos[1];
+      let price = infos[2]; // Le prix est bien ici
+      let images = infos[3].split(",").map(img => img.trim()).filter(Boolean);
+      let bbd = infos[4];
+      let weidian = infos[5];
+      let seller = infos[6] || ""; // Optionnel
       
-      if (infos.length >= 7) {
-        price = infos[2];
-        images = infos[3].split(",").map(img => img.trim()).filter(Boolean);
-        bbd = infos[4]; weidian = infos[5]; seller = infos[6] || "";
-      } else {
-        images = infos[2].split(",").map(img => img.trim()).filter(Boolean);
-        bbd = infos[3]; weidian = infos[4]; seller = infos[5] || "";
-      }
+      if (!validCategories.includes(category)) return;
+      products.push({ category, name, price, images, bbd, weidian, seller });
+    });
       
       if (!validCategories.includes(category)) return;
       products.push({ category, name, price: price || null, images, bbd, weidian, seller });
