@@ -244,18 +244,19 @@
     }
 
     .price-badge {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: var(--success);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      z-index: 5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
+  position: absolute;
+  top: 8px;
+  left: 8px; /* On remet à gauche */
+  background: var(--success);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  pointer-events: none; /* Ajouté pour ne pas gêner le clic sur la carte */
+}
 
     .product-images {
       display: flex;
