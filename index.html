@@ -977,16 +977,15 @@ function openLinksPopup(product) {
 closeProductPopup.addEventListener("click", () => { productPopup.classList.add("hidden"); });
 productPopup.addEventListener("click", (e) => { if (e.target === productPopup) productPopup.classList.add("hidden"); });
 
-// Parser & Rendu
 async function loadData() {
   try {
     const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => res.text());
     const productsText = await fetch("Produit.txt?t=" + Date.now()).then(res => res.text());
     
-    let sellers = [];
+    // Chargement des vendeurs
     try {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
-      sellers = sellersText.replace(/[\r\n]/g, "").trim().split("#").map(s => s.trim()).filter(Boolean);
+      const sellers = sellersText.replace(/[\r\n]/g, "").trim().split("#").map(s => s.trim()).filter(Boolean);
       sellers.forEach(seller => {
         const option = document.createElement("option");
         option.value = seller; option.textContent = seller; sellerSelect.appendChild(option);
@@ -995,33 +994,33 @@ async function loadData() {
 
     const validCategories = categoriesText.replace(/[\r\n]/g, "").trim().split("#").map(cat => cat.trim()).filter(Boolean);
     
-    const blocks = productsText.replace(/[\r\n]/g, "").trim().split("##").map(b => b.trim()).filter(Boolean);
+    // Nettoyage et découpage des produits
+    const blocks = productsText.split("##").map(b => b.trim()).filter(Boolean);
     products = [];
 
-   blocks.forEach(block => {
+    blocks.forEach(block => {
       const infos = block.split("#").map(i => i.trim());
-      // On demande au moins 6 éléments (catégorie, nom, prix, images, bbd, weidian)
+      // On vérifie qu'on a bien assez d'infos (7 éléments attendus : Cat, Nom, Prix, Image, BBD, Weidian, Vendeur)
       if (infos.length < 6) return; 
       
-      let category = infos[0];
-      let name = infos[1];
-      let price = infos[2]; // Le prix est bien ici
-      let images = infos[3].split(",").map(img => img.trim()).filter(Boolean);
-      let bbd = infos[4];
-      let weidian = infos[5];
-      let seller = infos[6] || ""; // Optionnel
+      const product = {
+        category: infos[0],
+        name: infos[1],
+        price: infos[2] || "",
+        images: infos[3] ? infos[3].split(",").map(img => img.trim()).filter(Boolean) : [],
+        bbd: infos[4],
+        weidian: infos[5],
+        seller: infos[6] || ""
+      };
       
-      if (!validCategories.includes(category)) return;
-      products.push({ category, name, price, images, bbd, weidian, seller });
-    });
-      
-      if (!validCategories.includes(category)) return;
-      products.push({ category, name, price: price || null, images, bbd, weidian, seller });
+      if (validCategories.includes(product.category)) {
+        products.push(product);
+      }
     });
 
     renderProducts(products);
   } catch (err) {
-    console.error("Erreur chargement", err);
+    console.error("Erreur chargement des données :", err);
   }
 }
 
