@@ -1004,13 +1004,12 @@ async function loadData() {
       if (infos.length < 6) return; 
       
       const product = {
-        category: infos[0],
-        name: infos[1],
-        price: infos[2] || "",
-        images: infos[3] ? infos[3].split(",").map(img => img.trim()).filter(Boolean) : [],
-        bbd: infos[4],
-        weidian: infos[5],
-        seller: infos[6] || ""
+        const categorie = infos[0];
+const nom = infos[1];
+const image = infos[2]; // Tout se décale d'un cran
+const lienBBD = infos[3];
+const lienWeidian = infos[4];
+const vendeur = infos[5];
       };
       
       if (validCategories.includes(product.category)) {
