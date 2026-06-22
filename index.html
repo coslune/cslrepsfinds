@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* Variables de design - Style Notion / Airtable (Dark par défaut) */
@@ -589,10 +589,10 @@
       to { opacity: 1; }
     }
 
-    /* RESPONSIVE TELEPHONE CORRIGÉ */
+    /* RESPONSIVE TELEPHONE AVEC FILTRES STICKY */
     @media (max-width: 768px) {
       .topbar {
-        position: relative; /* Corrigé : garde un flux normal */
+        position: relative;
         flex-direction: column;
         align-items: center;
         padding: 16px 12px;
@@ -611,16 +611,13 @@
         width: 100%;
         justify-content: center;
       }
-      .topbar .actions .search-wrapper {
+      .topbar .actions {
         display: none;
       }
-      .actions {
-        width: 100%;
-        flex-wrap: nowrap;
-        justify-content: center;
-      }
       .mobile-search-bar {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         position: sticky;
         top: 0;
         z-index: 9;
@@ -636,10 +633,22 @@
       .mobile-search-bar input {
         width: 100%;
         padding: 10px 12px;
-        font-size: 1rem; /* Plus grand pour éviter le zoom automatique iOS */
+        font-size: 1rem;
+      }
+      .mobile-filters {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+      }
+      .mobile-filters select {
+        flex: 1;
+        padding: 8px;
+        font-size: 0.85rem;
+        background: var(--input-bg);
+        color: var(--text);
       }
       main {
-        padding: 16px 12px; /* Corrigé : plus besoin du gros décalage de 240px */
+        padding: 16px 12px;
       }
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -706,7 +715,21 @@
   </div>
 </header>
 
-<div class="mobile-search-bar"><input type="text" id="mobileSearchInput" placeholder="🔍 Rechercher un produit..." /></div>
+<div class="mobile-search-bar">
+  <input type="text" id="mobileSearchInput" placeholder="🔍 Rechercher un produit..." />
+  <div class="mobile-filters">
+    <select id="mobileSellerSelect"><option value="all">Tous les vendeurs</option></select>
+    <select id="mobileCategorySelect">
+      <option value="all">Toutes les catégories</option>
+      <option value="PULL">PULL</option>
+      <option value="BAS">BAS</option>
+      <option value="CHAUSSURES">CHAUSSURES</option>
+      <option value="ACCESSOIRES">ACCESSOIRES</option>
+      <option value="T-SHIRT">T-SHIRT</option>
+      <option value="MANTEAU">MANTEAU</option>
+    </select>
+  </div>
+</div>
 
 <main>
   <div id="categoryContainer"></div>
@@ -759,7 +782,9 @@ const template = document.getElementById("productTemplate");
 const searchInput = document.getElementById("searchInput");
 const mobileSearchInput = document.getElementById("mobileSearchInput");
 const sellerSelect = document.getElementById("sellerSelect");
+const mobileSellerSelect = document.getElementById("mobileSellerSelect");
 const categorySelect = document.getElementById("categorySelect"); 
+const mobileCategorySelect = document.getElementById("mobileCategorySelect");
 const themeToggle = document.getElementById("themeToggle");
 
 const productPopup = document.getElementById("productPopup");
@@ -960,8 +985,11 @@ async function loadData() {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
       sellers = sellersText.replace(/[\r\n]/g, "").trim().split("#").map(s => s.trim()).filter(Boolean);
       sellers.forEach(seller => {
-        const option = document.createElement("option");
-        option.value = seller; option.textContent = seller; sellerSelect.appendChild(option);
+        const option1 = document.createElement("option");
+        option1.value = seller; option1.textContent = seller; sellerSelect.appendChild(option1);
+        
+        const option2 = document.createElement("option");
+        option2.value = seller; option2.textContent = seller; mobileSellerSelect.appendChild(option2);
       });
     } catch(e) {}
 
@@ -1042,6 +1070,12 @@ function filterAndSort(e) {
   if (e && e.target === mobileSearchInput) searchInput.value = mobileSearchInput.value;
   else if (e && e.target === searchInput) mobileSearchInput.value = searchInput.value;
 
+  if (e && e.target === mobileSellerSelect) sellerSelect.value = mobileSellerSelect.value;
+  else if (e && e.target === sellerSelect) mobileSellerSelect.value = sellerSelect.value;
+
+  if (e && e.target === mobileCategorySelect) categorySelect.value = mobileCategorySelect.value;
+  else if (e && e.target === categorySelect) mobileCategorySelect.value = categorySelect.value;
+
   const searchValue = searchInput.value.trim();
   
   if (searchValue === "DASHBOARDRECAP") {
@@ -1067,7 +1101,9 @@ function filterAndSort(e) {
 searchInput.addEventListener("input", filterAndSort);
 mobileSearchInput.addEventListener("input", filterAndSort);
 sellerSelect.addEventListener("change", filterAndSort);
+mobileSellerSelect.addEventListener("change", filterAndSort);
 categorySelect.addEventListener("change", filterAndSort); 
+mobileCategorySelect.addEventListener("change", filterAndSort);
 
 loadData();
 </script>
