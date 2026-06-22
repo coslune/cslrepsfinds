@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* Variables de design - Style Notion / Airtable (Dark par défaut) */
@@ -238,7 +238,6 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.05);
     }
 
-    /* Le compteur de clics secret "👁️" est retiré de la carte publique */
     .dashboard-counter-only {
       display: none;
     }
@@ -394,7 +393,7 @@
       font-size: 0.85rem;
       color: var(--muted);
       font-weight: 500;
-      text-transform: uppercase
+      text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
@@ -590,12 +589,10 @@
       to { opacity: 1; }
     }
 
+    /* RESPONSIVE TELEPHONE CORRIGÉ */
     @media (max-width: 768px) {
       .topbar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
+        position: relative; /* Corrigé : garde un flux normal */
         flex-direction: column;
         align-items: center;
         padding: 16px 12px;
@@ -630,7 +627,7 @@
         backdrop-filter: blur(12px);
         background: rgba(25, 25, 25, 0.9);
         border-bottom: 1px solid var(--border);
-        padding: 10px 12px;
+        padding: 12px;
         width: 100%;
       }
       body.light .mobile-search-bar {
@@ -638,10 +635,11 @@
       }
       .mobile-search-bar input {
         width: 100%;
-        padding: 8px 12px;
+        padding: 10px 12px;
+        font-size: 1rem; /* Plus grand pour éviter le zoom automatique iOS */
       }
       main {
-        padding: 240px 12px 16px 12px; 
+        padding: 16px 12px; /* Corrigé : plus besoin du gros décalage de 240px */
       }
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -779,14 +777,8 @@ let products = [];
 let currentProduct = null;
 let isDashboardMode = false;
 
-// Namespace unique pour l'API CountAPI lié à CSL FINDS
 const API_NAMESPACE = "cslfinds_v4_prod";
 
-// ============================================
-// SYSTEM REFAIT : BASE DE DONNÉES EN LIGNE + CLICS UNIQUES
-// ============================================
-
-// Vérifie de façon unique si l'utilisateur a déjà cliqué sur ce produit
 function hasUserClickedProduct(productName) {
   return localStorage.getItem(`has_clicked_${btoa(productName)}`) === "true";
 }
@@ -795,24 +787,19 @@ function markProductAsClicked(productName) {
   localStorage.setItem(`has_clicked_${btoa(productName)}`, "true");
 }
 
-// Incrémente la vue globale de manière UNIQUE sur le serveur
 async function trackGlobalProductClick(productName) {
-  if (hasUserClickedProduct(productName)) return; // Bloque si déjà cliqué
+  if (hasUserClickedProduct(productName)) return; 
   
   const key = productName.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
   try {
-    // 1. Incrémente le compteur spécifique du produit
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/${key}`).catch(() => {});
-    // 2. Incrémente le compteur total du site
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/total_site_visits`).catch(() => {});
-    
     markProductAsClicked(productName);
   } catch(e) {
     console.error("Erreur API de comptage", e);
   }
 }
 
-// Récupère la valeur en direct d'un produit depuis le serveur
 async function fetchProductClicksFromServer(productName) {
   const key = productName.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
   try {
@@ -825,7 +812,6 @@ async function fetchProductClicksFromServer(productName) {
   return 0;
 }
 
-// Récupère la valeur totale des clics sur le site
 async function fetchTotalSiteClicks() {
   try {
     const res = await fetch(`https://api.countapi.xyz/get/${API_NAMESPACE}/total_site_visits`);
@@ -837,10 +823,6 @@ async function fetchTotalSiteClicks() {
   return 0;
 }
 
-// ============================================
-// GESTION DU DASHBOARD SECRET (DASHBOARDRECAP)
-// ============================================
-
 async function showDashboard() {
   isDashboardMode = true;
   categoryContainer.style.display = 'none';
@@ -848,14 +830,12 @@ async function showDashboard() {
   
   document.getElementById('statGlobalSite').textContent = "Chargement...";
   
-  // Charge le total général
   const totalClicks = await fetchTotalSiteClicks();
   document.getElementById('statGlobalSite').textContent = `${totalClicks} clics`;
   
   const productStatsList = document.getElementById('productStatsList');
-  productStatsList.innerHTML = '<p style="text-align:center; color:var(--muted); padding:20px;">Récupération des vues réelles sur la base de données...</p>';
+  productStatsList.innerHTML = '<p style="text-align:center; color:var(--muted); padding:20px;">Récupération des vues réelles...</p>';
   
-  // Récupère en parallèle les compteurs réels de chaque produit
   const promises = products.map(async (product) => {
     const clicks = await fetchProductClicksFromServer(product.name);
     return {
@@ -866,7 +846,6 @@ async function showDashboard() {
   });
   
   const productStats = await Promise.all(promises);
-  // Trie par produit le plus cliqué
   productStats.sort((a, b) => b.clicks - a.clicks);
   
   productStatsList.innerHTML = '';
@@ -901,7 +880,6 @@ exitDashboard.addEventListener('click', () => {
   filterAndSort();
 });
 
-// Téléchargement du fichier de configuration
 downloadProduitFile.addEventListener('click', () => {
   let content = '';
   products.forEach(product => {
@@ -921,7 +899,6 @@ downloadProduitFile.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-// TikTok Detection
 (function detectTikTokBrowser() {
   const alreadySeen = localStorage.getItem("tiktokPopupSeen");
   if (alreadySeen) return;
@@ -936,7 +913,6 @@ downloadProduitFile.addEventListener('click', () => {
   }
 })();
 
-// Thème
 (function loadTheme() {
   if (localStorage.getItem("theme") === "light") {
     document.body.classList.add("light");
@@ -951,7 +927,6 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-// Ouverture Popup Article
 function openLinksPopup(product) {
   currentProduct = product;
   popupProductTitle.textContent = product.name;
@@ -967,7 +942,6 @@ function openLinksPopup(product) {
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
   
-  // Déclenche l'enregistrement de la vue unique en tâche de fond sur la base de données globale
   trackGlobalProductClick(product.name);
   
   productPopup.classList.remove("hidden");
@@ -976,7 +950,6 @@ function openLinksPopup(product) {
 closeProductPopup.addEventListener("click", () => { productPopup.classList.add("hidden"); });
 productPopup.addEventListener("click", (e) => { if (e.target === productPopup) productPopup.classList.add("hidden"); });
 
-// Parser & Rendu
 async function loadData() {
   try {
     const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => res.text());
@@ -997,21 +970,16 @@ async function loadData() {
     const blocks = productsText.replace(/[\r\n]/g, "").trim().split("##").map(b => b.trim()).filter(Boolean);
     products = [];
 
-blocks.forEach(block => {
+    blocks.forEach(block => {
       const infos = block.split("#").map(i => i.trim());
-      
-      // Si la ligne est trop courte (moins de 4 éléments), on ignore
       if (infos.length < 4) return;
       
-      // On affecte les variables de manière sécurisée
-      // 0: Cat, 1: Nom, 2: Prix, 3: Images, 4: BBD, 5: Weidian, 6: Vendeur (Optionnel)
       let category = infos[0];
       let name = infos[1];
       let price = infos[2] || "";
       let images = infos[3] ? infos[3].split(",").map(img => img.trim()).filter(Boolean) : [];
       let bbd = infos[4] || "";
       let weidian = infos[5] || "";
-      // Si le 7ème élément n'existe pas, on met une chaîne vide au lieu d'un bug
       let seller = infos[6] || ""; 
       
       if (!validCategories.includes(category)) return;
@@ -1089,9 +1057,6 @@ function filterAndSort(e) {
   let filtered = products.filter(p => {
     const matchesName = p.name.toLowerCase().includes(searchLower);
     const matchesCategory = (categoryValue === "all" || p.category.toUpperCase() === categoryValue.toUpperCase());
-    
-    // Logique corrigée : si "all" est sélectionné, on affiche tout. 
-    // Sinon, on vérifie si le vendeur correspond OU s'il est vide (pas de vendeur)
     const matchesSeller = (sellerValue === "all") || (p.seller === sellerValue) || (sellerValue === "Sans vendeur" && !p.seller);
     
     return matchesName && matchesCategory && matchesSeller;
@@ -1104,28 +1069,7 @@ mobileSearchInput.addEventListener("input", filterAndSort);
 sellerSelect.addEventListener("change", filterAndSort);
 categorySelect.addEventListener("change", filterAndSort); 
 
-// Lancement
 loadData();
-
-// Popup BBD
-if (!localStorage.getItem('hideBBD')) {
-  setTimeout(() => { if(document.getElementById('popupBBD')) document.getElementById('popupBBD').style.display = 'flex'; }, 1000);
-}
-function closePopup() {
-  if (document.getElementById('noMore').checked) localStorage.setItem('hideBBD', 'true');
-  if(document.getElementById('popupBBD')) document.getElementById('popupBBD').style.display = 'none';
-}
 </script>
-
-<div id="popupBBD" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px);">
-  <div style="background: #121212; color: white; width: 85%; max-width: 320px; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid #2eaadc; position: relative;">
-    <button onclick="closePopup()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #9ca3af; font-size: 22px; cursor: pointer;">✕</button>
-    <h2 style="font-weight: 800; font-size: 16px; color: #2eaadc; margin-bottom: 8px;">REJOINS BBDBUY !</h2>
-    <p style="font-size: 11px; color: #9ca3af; line-height: 1.4; margin-bottom: 15px;">Inscris-toi dès maintenant sur BbdBuy pour obtenir ton pack de coupons.</p>
-    <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" style="display: block; padding: 12px; border-radius: 8px; font-weight: 800; background: #2eaadc; color: #000; text-decoration: none;">S'INSCRIRE ICI</a>
-    <label style="display:block; margin-top:15px; font-size:11px; color:#9ca3af; cursor:pointer;"><input type="checkbox" id="noMore" style="margin-right: 6px;"> Ne plus afficher</label>
-  </div>
-</div>
-
 </body>
 </html>
