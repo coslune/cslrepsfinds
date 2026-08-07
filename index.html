@@ -115,7 +115,7 @@
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      width: 48px;  
+      width: 48px; 
       height: 48px; 
       border-radius: 8px; 
       transition: all 0.2s ease;
@@ -1036,7 +1036,6 @@ function renderProducts(data) {
   const grouped = {};
   data.forEach(p => { if (!grouped[p.category]) grouped[p.category] = []; grouped[p.category].push(p); });
 
-  // Tri automatique des sections sur le site selon l'ordre strict
   const sortedCategories = Object.keys(grouped).sort((a, b) => {
     let indexA = TARGET_CATEGORY_ORDER.indexOf(a.toUpperCase());
     let indexB = TARGET_CATEGORY_ORDER.indexOf(b.toUpperCase());
@@ -1118,9 +1117,10 @@ searchInput.addEventListener("input", filterAndSort);
 mobileSearchInput.addEventListener("input", filterAndSort);
 sellerSelect.addEventListener("change", filterAndSort);
 mobileSellerSelect.addEventListener("change", filterAndSort);
-categorySelect.addEventListener("change", filterAndSort); 
+categorySelect.addEventListener("change", filterAndSort);
 mobileCategorySelect.addEventListener("change", filterAndSort);
 
+// Lancer le chargement des données au démarrage
 loadData();
 </script>
 </body>
