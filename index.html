@@ -661,17 +661,24 @@
   </style>
 </head>
 <body>
-<!-- POPUP D'ACCUEIL PERSONNALISÉ -->
+
+<!-- POPUP D'ACCUEIL PERSONNALISÉ (MODIFIABLE ICI) -->
 <div id="welcomePopup" class="popup-overlay hidden">
   <div class="popup-card">
     <h2>Bienvenue sur CSL FINDS !</h2>
-    <p>S'inscrire sur BBDBUY pour bénéficier de 200€ de coupons et -20% </p>
-    
+    <p>Rejoins notre communauté pour ne rater aucun nouveau find exclusif et profiter des meilleurs liens !</p>
     <div class="popup-links-container">
-      <!-- Remplace le lien '#' par ton lien d'inscription -->
       <a href="https://www.bbdbuyeu.com/register?inviteCode=hQUDCD" target="_blank" class="popup-btn bbd">S'inscrire maintenant</a>
       <button id="closeWelcomePopup" class="popup-btn weidian" style="cursor:pointer;">Fermer</button>
     </div>
+  </div>
+</div>
+
+<div id="tiktokPopup" class="popup-overlay hidden">
+  <div class="popup-card">
+    <h2>Ouvre le site dans ton navigateur</h2>
+    <p>Pour une meilleure expérience, ouvre ce site via les <strong>3 petits points</strong> de TikTok puis cliquez sur <strong>"Ouvrir dans le navigateur"</strong>.</p>
+    <button id="closePopup" style="width: 100%; background: var(--accent); color: white; border: none; padding: 10px; font-weight: 600; border-radius: 6px;">Compris</button>
   </div>
 </div>
 
@@ -783,6 +790,27 @@
 </template>
 
 <script>
+// --- GESTION DU POPUP D'ACCUEIL ---
+(function initWelcomePopup() {
+  const welcomePopup = document.getElementById("welcomePopup");
+  const closeWelcomeBtn = document.getElementById("closeWelcomePopup");
+
+  // Afficher le popup à l'ouverture
+  welcomePopup.classList.remove("hidden");
+
+  // Fermer le popup au clic sur le bouton "Fermer"
+  closeWelcomeBtn.addEventListener("click", () => {
+    welcomePopup.classList.add("hidden");
+  });
+
+  // Fermer aussi si on clique en dehors de la carte
+  welcomePopup.addEventListener("click", (e) => {
+    if (e.target === welcomePopup) {
+      welcomePopup.classList.add("hidden");
+    }
+  });
+})();
+
 const categoryContainer = document.getElementById("categoryContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
 const template = document.getElementById("productTemplate");
