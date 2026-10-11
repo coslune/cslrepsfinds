@@ -8,8 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
+    /* Variables de design - Style Notion / Airtable (Dark par défaut) */
     :root {
       --bg: #191919;
       --card: #202020;
@@ -247,6 +249,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
+    /* Badge Vues avec l'icône de l'œil */
     .views-badge {
       position: absolute;
       top: 8px;
@@ -262,7 +265,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
 
     .product-images {
@@ -549,7 +552,7 @@
       margin-bottom: 18px;
       display: flex;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
@@ -671,6 +674,7 @@
 </head>
 <body>
 
+<!-- POPUPS -->
 <div id="welcomePopup" class="popup-overlay hidden">
   <div class="popup-card">
     <h2>REJOINS BBDBUY!</h2>
@@ -696,7 +700,7 @@
     <div id="popupProductInfo" class="popup-sub">
       <span id="popupProductCategory">Catégorie</span>
       <span id="popupProductSeller"></span>
-      <span id="popupProductViews" style="font-weight: 600; color: var(--accent);">👁️ 0 vues</span>
+      <span id="popupProductViews" style="font-weight: 600; color: var(--accent);"><i class="fa-regular fa-eye"></i> 0 vues</span>
     </div>
     <div class="popup-links-container">
       <a id="popupBbdLink" class="popup-btn bbd" target="_blank">Ouvrir le lien BBD</a>
@@ -706,6 +710,7 @@
   </div>
 </div>
 
+<!-- EN-TÊTE -->
 <header class="topbar">
   <div class="brand-container">
     <div class="brand">
@@ -725,13 +730,6 @@
     <select id="sellerSelect"><option value="all">Tous les vendeurs</option></select>
     <select id="categorySelect">
       <option value="all">Toutes les catégories</option>
-      <option value="T-SHIRT">T-SHIRT</option>
-      <option value="PULL">PULL</option>
-      <option value="SHORT">SHORT</option>
-      <option value="PANTALON">PANTALON</option>
-      <option value="MANTEAU">MANTEAU</option>
-      <option value="ACCESSOIRES">ACCESSOIRES</option>
-      <option value="CHAUSSURES">CHAUSSURES</option>
     </select>
     <button id="themeToggle">🌙</button>
   </div>
@@ -743,17 +741,11 @@
     <select id="mobileSellerSelect"><option value="all">Tous les vendeurs</option></select>
     <select id="mobileCategorySelect">
       <option value="all">Toutes les catégories</option>
-      <option value="T-SHIRT">T-SHIRT</option>
-      <option value="PULL">PULL</option>
-      <option value="SHORT">SHORT</option>
-      <option value="PANTALON">PANTALON</option>
-      <option value="CHAUSSURES">CHAUSSURES</option>
-      <option value="ACCESSOIRES">ACCESSOIRES</option>
-      <option value="MANTEAU">MANTEAU</option>
     </select>
   </div>
 </div>
 
+<!-- CONTENU PRINCIPAL -->
 <main>
   <div id="categoryContainer"></div>
   
@@ -802,18 +794,9 @@
 (function initWelcomePopup() {
   const welcomePopup = document.getElementById("welcomePopup");
   const closeWelcomeBtn = document.getElementById("closeWelcomePopup");
-
   welcomePopup.classList.remove("hidden");
-
-  closeWelcomeBtn.addEventListener("click", () => {
-    welcomePopup.classList.add("hidden");
-  });
-
-  welcomePopup.addEventListener("click", (e) => {
-    if (e.target === welcomePopup) {
-      welcomePopup.classList.add("hidden");
-    }
-  });
+  closeWelcomeBtn.addEventListener("click", () => welcomePopup.classList.add("hidden"));
+  welcomePopup.addEventListener("click", (e) => { if (e.target === welcomePopup) welcomePopup.classList.add("hidden"); });
 })();
 
 const categoryContainer = document.getElementById("categoryContainer");
@@ -836,149 +819,46 @@ const popupBbdLink = document.getElementById("popupBbdLink");
 const popupWeidianLink = document.getElementById("popupWeidianLink");
 const closeProductPopup = document.getElementById("closeProductPopup");
 
-const exitDashboard = document.getElementById("exitDashboard");
-const downloadProduitFile = document.getElementById("downloadProduitFile");
-
 let products = [];
 let currentProduct = null;
-let isDashboardMode = false;
-
-// Cache local en mémoire pour éviter les requêtes lentes
 const viewsCache = {};
 
 const TARGET_CATEGORY_ORDER = ["T-SHIRT", "PANTALON", "PULL", "CHAUSSURES", "ACCESSOIRES", "MANTEAU", "SHORT"];
 const API_NAMESPACE = "cslfinds_v4_prod";
 
-function hasUserClickedProduct(productName) {
-  return localStorage.getItem(`has_clicked_${btoa(productName)}`) === "true";
+function hasUserClickedProduct(name) {
+  return localStorage.getItem(`has_clicked_${btoa(name)}`) === "true";
 }
 
-function markProductAsClicked(productName) {
-  localStorage.setItem(`has_clicked_${btoa(productName)}`, "true");
+function markProductAsClicked(name) {
+  localStorage.setItem(`has_clicked_${btoa(name)}`, "true");
 }
 
-async function trackGlobalProductClick(productName) {
-  if (hasUserClickedProduct(productName)) return; 
-  
-  const key = productName.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
-  
-  // Incrémentation immédiate en cache local pour la réactivité
-  if (viewsCache[productName] !== undefined) {
-    viewsCache[productName]++;
-  }
-  
+async function trackGlobalProductClick(name) {
+  if (hasUserClickedProduct(name)) return; 
+  if (viewsCache[name] !== undefined) viewsCache[name]++;
+  const key = name.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
   try {
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/${key}`).catch(() => {});
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/total_site_visits`).catch(() => {});
-    markProductAsClicked(productName);
+    markProductAsClicked(name);
   } catch(e) {}
 }
 
-async function fetchProductClicksFromServer(productName) {
-  if (viewsCache[productName] !== undefined) {
-    return viewsCache[productName];
-  }
-  
-  const key = productName.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
+async function fetchProductClicksFromServer(name) {
+  if (viewsCache[name] !== undefined) return viewsCache[name];
+  const key = name.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
   try {
     const res = await fetch(`https://api.countapi.xyz/get/${API_NAMESPACE}/${key}`);
     if(res.ok) {
       const data = await res.json();
-      viewsCache[productName] = data.value || 0;
-      return viewsCache[productName];
+      viewsCache[name] = data.value || 0;
+      return viewsCache[name];
     }
   } catch(e) {}
-  
-  viewsCache[productName] = 0;
+  viewsCache[name] = 0;
   return 0;
 }
-
-async function fetchTotalSiteClicks() {
-  try {
-    const res = await fetch(`https://api.countapi.xyz/get/${API_NAMESPACE}/total_site_visits`);
-    if(res.ok) {
-      const data = await res.json();
-      return data.value || 0;
-    }
-  } catch(e) {}
-  return 0;
-}
-
-async function showDashboard() {
-  isDashboardMode = true;
-  categoryContainer.style.display = 'none';
-  dashboardContainer.classList.add('active');
-  
-  document.getElementById('statGlobalSite').textContent = "Chargement...";
-  
-  const totalClicks = await fetchTotalSiteClicks();
-  document.getElementById('statGlobalSite').textContent = `${totalClicks} clics`;
-  
-  const productStatsList = document.getElementById('productStatsList');
-  productStatsList.innerHTML = '<p style="text-align:center; color:var(--muted); padding:20px;">Récupération des vues réelles...</p>';
-  
-  const promises = products.map(async (product) => {
-    const clicks = await fetchProductClicksFromServer(product.name);
-    return {
-      product: product,
-      clicks: clicks,
-      price: product.price || null
-    };
-  });
-  
-  const productStats = await Promise.all(promises);
-  productStats.sort((a, b) => b.clicks - a.clicks);
-  
-  productStatsList.innerHTML = '';
-  productStats.forEach(stat => {
-    const item = document.createElement('div');
-    item.className = 'product-stat-item';
-    
-    let priceHTML = '';
-    if (stat.price !== null && stat.price !== '') {
-      priceHTML = `<span class="product-stat-price">${parseFloat(stat.price).toFixed(2)}€</span>`;
-    }
-    
-    item.innerHTML = `
-      <span class="product-stat-name">${stat.product.name}</span>
-      ${priceHTML}
-      <span class="product-stat-clicks">${stat.clicks} 👁️</span>
-    `;
-    productStatsList.appendChild(item);
-  });
-}
-
-function hideDashboard() {
-  isDashboardMode = false;
-  dashboardContainer.classList.remove('active');
-  categoryContainer.style.display = 'block';
-}
-
-exitDashboard.addEventListener('click', () => {
-  hideDashboard();
-  searchInput.value = '';
-  mobileSearchInput.value = '';
-  filterAndSort();
-});
-
-downloadProduitFile.addEventListener('click', () => {
-  let content = '';
-  products.forEach(product => {
-    const images = product.images.join(',');
-    const price = product.price || '';
-    const seller = product.seller || '';
-    content += `##${product.category}#${product.name}#${price}#${images}#${product.bbd}#${product.weidian}#${seller}\n`;
-  });
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'Produit.txt';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
 
 (function detectTikTokBrowser() {
   const alreadySeen = localStorage.getItem("tiktokPopupSeen");
@@ -1023,19 +903,16 @@ async function openLinksPopup(product) {
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
   
-  // Affichage direct depuis le cache ou chargement rapide
   const initialViews = await fetchProductClicksFromServer(product.name);
-  popupProductViews.textContent = `👁️ ${initialViews} vue${initialViews > 1 ? 's' : ''}`;
+  popupProductViews.innerHTML = `<i class="fa-regular fa-eye"></i> ${initialViews} vue${initialViews > 1 ? 's' : ''}`;
   
   productPopup.classList.remove("hidden");
 
-  // Enregistrement du clic en arrière-plan et mise à jour dynamique de la vue
   await trackGlobalProductClick(product.name);
   const updatedViews = await fetchProductClicksFromServer(product.name);
-  popupProductViews.textContent = `👁️ ${updatedViews} vue${updatedViews > 1 ? 's' : ''}`;
+  popupProductViews.innerHTML = `<i class="fa-regular fa-eye"></i> ${updatedViews} vue${updatedViews > 1 ? 's' : ''}`;
   
-  // Met aussi à jour le badge sur la carte en arrière-plan sans recharger la page
-  const cardBadge = document.querySelector(`[data-product-name="${CSS.escape(product.name)}"] .view-count-text`);
+  const cardBadge = document.querySelector(`.view-count-${CSS.escape(product.name)}`);
   if (cardBadge) {
     cardBadge.textContent = updatedViews;
   }
@@ -1049,20 +926,20 @@ async function loadData() {
     const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => res.text());
     const productsText = await fetch("Produit.txt?t=" + Date.now()).then(res => res.text());
     
-    let sellers = [];
     try {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
-      sellers = sellersText.replace(/[\r\n]/g, "").trim().split("#").map(s => s.trim()).filter(Boolean);
+      const sellers = sellersText.replace(/[\r\n]/g, "").trim().split("#").map(s => s.trim()).filter(Boolean);
       sellers.forEach(seller => {
-        const option1 = document.createElement("option");
-        option1.value = seller; option1.textContent = seller; sellerSelect.appendChild(option1);
-        
-        const option2 = document.createElement("option");
-        option2.value = seller; option2.textContent = seller; mobileSellerSelect.appendChild(option2);
+        const opt1 = document.createElement("option"); opt1.value = seller; opt1.textContent = seller; sellerSelect.appendChild(opt1);
+        const opt2 = document.createElement("option"); opt2.value = seller; opt2.textContent = seller; mobileSellerSelect.appendChild(opt2);
       });
     } catch(e) {}
 
     const validCategories = categoriesText.replace(/[\r\n]/g, "").trim().split("#").map(cat => cat.trim()).filter(Boolean);
+    validCategories.forEach(cat => {
+      const opt1 = document.createElement("option"); opt1.value = cat; opt1.textContent = cat; categorySelect.appendChild(opt1);
+      const opt2 = document.createElement("option"); opt2.value = cat; opt2.textContent = cat; mobileCategorySelect.appendChild(opt2);
+    });
     
     const blocks = productsText.replace(/[\r\n]/g, "").trim().split("##").map(b => b.trim()).filter(Boolean);
     products = [];
@@ -1071,17 +948,15 @@ async function loadData() {
       const infos = block.split("#").map(i => i.trim());
       if (infos.length < 4) return;
       
-      let category = infos[0];
-      let name = infos[1];
-      let price = infos[2] || "";
-      let images = infos[3] ? infos[3].split(",").map(img => img.trim()).filter(Boolean) : [];
-      let bbd = infos[4] || "";
-      let weidian = infos[5] || "";
-      let seller = infos[6] || ""; 
-      
-      if (!validCategories.includes(category)) return;
-      
-      products.push({ category, name, price, images, bbd, weidian, seller });
+      products.push({
+        category: infos[0],
+        name: infos[1],
+        price: infos[2] || "",
+        images: infos[3] ? infos[3].split(",").map(img => img.trim()).filter(Boolean) : [],
+        bbd: infos[4] || "",
+        weidian: infos[5] || "",
+        seller: infos[6] || ""
+      });
     });
 
     renderProducts(products);
@@ -1103,10 +978,8 @@ async function renderProducts(data) {
   const sortedCategories = Object.keys(grouped).sort((a, b) => {
     let indexA = TARGET_CATEGORY_ORDER.indexOf(a.toUpperCase());
     let indexB = TARGET_CATEGORY_ORDER.indexOf(b.toUpperCase());
-    
     if (indexA === -1) indexA = 99;
     if (indexB === -1) indexB = 99;
-    
     return indexA - indexB;
   });
 
@@ -1118,7 +991,6 @@ async function renderProducts(data) {
     for (const product of grouped[category]) {
       const clone = template.content.cloneNode(true);
       const cardElement = clone.querySelector(".product-card");
-      cardElement.setAttribute("data-product-name", product.name);
 
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
@@ -1136,12 +1008,12 @@ async function renderProducts(data) {
 
       const vBadge = document.createElement("div");
       vBadge.className = "views-badge";
-      vBadge.innerHTML = `👁️ <span class="view-count-text">...</span>`;
+      vBadge.innerHTML = `<i class="fa-regular fa-eye text-[10px]"></i> <span class="view-count-${CSS.escape(product.name)}">...</span>`;
       cardElement.appendChild(vBadge);
 
-      // Chargement optimisé des vues en arrière-plan sans bloquer l'affichage
       fetchProductClicksFromServer(product.name).then(views => {
-        vBadge.querySelector('.view-count-text').textContent = views;
+        const span = vBadge.querySelector('.view-count-' + CSS.escape(product.name));
+        if (span) span.textContent = views;
       });
 
       const imgCont = clone.querySelector(".product-images");
