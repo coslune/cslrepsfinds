@@ -615,7 +615,7 @@ const closeProductPopup = document.getElementById("closeProductPopup");
 let products = [];
 const TARGET_CATEGORY_ORDER = ["T-SHIRT", "PANTALON", "PULL", "CHAUSSURES", "ACCESSOIRES", "MANTEAU", "SHORT"];
 
-// --- BASE DE DONNÉES EN LIGNE SYNCHRONISÉE EN TEMPS RÉEL ---
+// --- BASE DE DONNÉES EN LIGNE AVEC PROTECTION SECURED ---
 const NAMESPACE = "csl_finds_v1";
 const viewsCache = {};
 
@@ -623,32 +623,33 @@ function cleanKey(name) {
   return name.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
 }
 
-// Récupération des clics depuis le serveur
+// Récupération sécurisée avec Timeout
 async function fetchServerClicks(productName) {
   if (viewsCache[productName] !== undefined) return viewsCache[productName];
   const key = cleanKey(productName);
   try {
-    const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // Annule si l'API met +2s
+    const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}`, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (res.ok) {
       const data = await res.json();
       viewsCache[productName] = data.count || 0;
       return viewsCache[productName];
     }
   } catch (e) {}
-  viewsCache[productName] = 0;
-  return 0;
+  viewsCache[productName] = viewsCache[productName] || 0;
+  return viewsCache[productName];
 }
 
-// Enregistrement d'un clic partagé en ligne
+// Incrémentation partagée
 async function incrementServerClick(productName) {
   viewsCache[productName] = (viewsCache[productName] || 0) + 1;
   const key = cleanKey(productName);
   try {
-    const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}/up`);
-    if (res.ok) {
-      const data = await res.json();
-      viewsCache[productName] = data.count || viewsCache[productName];
-    }
+    fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}/up`).then(res => res.json()).then(data => {
+      if (data && data.count) viewsCache[productName] = data.count;
+    }).catch(() => {});
   } catch (e) {}
   return viewsCache[productName];
 }
@@ -683,7 +684,7 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-// --- POPUP DU PRODUIT AVEC SYNCHRONISATION ---
+// --- POPUP PRODUIT ---
 async function openLinksPopup(product, spanViewCount) {
   popupProductTitle.textContent = product.name;
   popupProductCategory.textContent = `Catégorie : ${product.category}`;
@@ -700,7 +701,7 @@ async function openLinksPopup(product, spanViewCount) {
   
   productPopup.classList.remove("hidden");
 
-  // Incrémente le compteur en ligne et met à jour l'affichage immédiatement
+  // Incrémentation instantanée des clics
   const newCount = await incrementServerClick(product.name);
   if (spanViewCount) {
     spanViewCount.textContent = newCount;
@@ -800,12 +801,12 @@ function renderProducts(data) {
       // Nombre de vues
       const vBadge = document.createElement("div");
       vBadge.className = "views-badge";
-      vBadge.innerHTML = `<i class="fa-regular fa-eye text-[10px]"></i> <span class="view-count">...</span>`;
+      vBadge.innerHTML = `<i class="fa-regular fa-eye text-[10px]"></i> <span class="view-count">0</span>`;
       cardElement.appendChild(vBadge);
 
       const spanViewCount = vBadge.querySelector('.view-count');
 
-      // Récupération asynchrone des vues réelles du serveur
+      // Récupération asynchrone non-bloquante
       fetchServerClicks(product.name).then(count => {
         spanViewCount.textContent = count;
       });
