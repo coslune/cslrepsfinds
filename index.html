@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* Variables de design - Style Notion / Airtable (Dark par défaut) */
     :root {
       --bg: #191919;
       --card: #202020;
@@ -23,17 +22,14 @@
       --text-tag: #7dd3fc;
       --input-bg: #252525;
       
-      /* Couleur pour le tag vendeur bleu */
       --bg-seller: rgba(37, 99, 235, 0.2);
       --text-seller: #60a5fa;
       
-      /* Couleurs pour les stats */
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
     }
 
-    /* Thème Clair - Style Notion Pur */
     body.light {
       --bg: #ffffff;
       --card: #fbfbfa;
@@ -68,7 +64,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Barre supérieure (Topbar) */
     .topbar {
       position: sticky;
       top: 0;
@@ -238,41 +233,37 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.05);
     }
 
-    .dashboard-counter-only {
-      display: none;
+    .price-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--success);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      z-index: 5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
-.price-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: var(--success);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  z-index: 5;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
-.views-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.75);
-  color: #e2e8f0;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  z-index: 5;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+    .views-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #e2e8f0;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 5;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
 
     .product-images {
       display: flex;
@@ -559,6 +550,7 @@
       display: flex;
       justify-content: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
 
     .popup-links-container {
@@ -607,7 +599,6 @@
       to { opacity: 1; }
     }
 
-    /* RESPONSIVE TELEPHONE AVEC FILTRES STICKY */
     @media (max-width: 768px) {
       .topbar {
         position: relative;
@@ -680,7 +671,6 @@
 </head>
 <body>
 
-<!-- POPUP D'ACCUEIL PERSONNALISÉ (MODIFIABLE ICI) -->
 <div id="welcomePopup" class="popup-overlay hidden">
   <div class="popup-card">
     <h2>REJOINS BBDBUY!</h2>
@@ -706,13 +696,14 @@
     <div id="popupProductInfo" class="popup-sub">
       <span id="popupProductCategory">Catégorie</span>
       <span id="popupProductSeller"></span>
+      <span id="popupProductViews" style="font-weight: 600; color: var(--accent);">👁️ 0 vues</span>
     </div>
     <div class="popup-links-container">
       <a id="popupBbdLink" class="popup-btn bbd" target="_blank">Ouvrir le lien BBD</a>
       <a id="popupWeidianLink" class="popup-btn weidian" target="_blank">Ouvrir le lien Weidian</a>
     </div>
     <span id="closeProductPopup" class="popup-close-text">Fermer</span>
-  <span id="popupProductViews" style="margin-left: 8px; font-weight: 600; color: var(--accent);">👁️ 0 vues</span>
+  </div>
 </div>
 
 <header class="topbar">
@@ -740,7 +731,7 @@
       <option value="PANTALON">PANTALON</option>
       <option value="MANTEAU">MANTEAU</option>
       <option value="ACCESSOIRES">ACCESSOIRES</option>
-       <option value="CHAUSSURES">CHAUSSURES</option>
+      <option value="CHAUSSURES">CHAUSSURES</option>
     </select>
     <button id="themeToggle">🌙</button>
   </div>
@@ -753,7 +744,7 @@
     <select id="mobileCategorySelect">
       <option value="all">Toutes les catégories</option>
       <option value="T-SHIRT">T-SHIRT</option>
-       <option value="PULL">PULL</option>
+      <option value="PULL">PULL</option>
       <option value="SHORT">SHORT</option>
       <option value="PANTALON">PANTALON</option>
       <option value="CHAUSSURES">CHAUSSURES</option>
@@ -808,21 +799,16 @@
 </template>
 
 <script>
-// --- GESTION DU POPUP D'ACCUEIL ---
 (function initWelcomePopup() {
   const welcomePopup = document.getElementById("welcomePopup");
-  const popupProductViews = document.getElementById("popupProductViews");
   const closeWelcomeBtn = document.getElementById("closeWelcomePopup");
 
-  // Afficher le popup à l'ouverture
   welcomePopup.classList.remove("hidden");
 
-  // Fermer le popup au clic sur le bouton "Fermer"
   closeWelcomeBtn.addEventListener("click", () => {
     welcomePopup.classList.add("hidden");
   });
 
-  // Fermer aussi si on clique en dehors de la carte
   welcomePopup.addEventListener("click", (e) => {
     if (e.target === welcomePopup) {
       welcomePopup.classList.add("hidden");
@@ -845,6 +831,7 @@ const productPopup = document.getElementById("productPopup");
 const popupProductTitle = document.getElementById("popupProductTitle");
 const popupProductCategory = document.getElementById("popupProductCategory");
 const popupProductSeller = document.getElementById("popupProductSeller");
+const popupProductViews = document.getElementById("popupProductViews");
 const popupBbdLink = document.getElementById("popupBbdLink");
 const popupWeidianLink = document.getElementById("popupWeidianLink");
 const closeProductPopup = document.getElementById("closeProductPopup");
@@ -856,9 +843,7 @@ let products = [];
 let currentProduct = null;
 let isDashboardMode = false;
 
-// Ordre strict et précis des catégories demandé
 const TARGET_CATEGORY_ORDER = ["T-SHIRT", "PANTALON", "PULL", "CHAUSSURES", "ACCESSOIRES", "MANTEAU", "SHORT"];
-
 const API_NAMESPACE = "cslfinds_v4_prod";
 
 function hasUserClickedProduct(productName) {
@@ -877,9 +862,7 @@ async function trackGlobalProductClick(productName) {
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/${key}`).catch(() => {});
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/total_site_visits`).catch(() => {});
     markProductAsClicked(productName);
-  } catch(e) {
-    console.error("Erreur API de comptage", e);
-  }
+  } catch(e) {}
 }
 
 async function fetchProductClicksFromServer(productName) {
@@ -1009,7 +992,7 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-function openLinksPopup(product) {
+async function openLinksPopup(product) {
   currentProduct = product;
   popupProductTitle.textContent = product.name;
   popupProductCategory.textContent = `Catégorie : ${product.category}`;
@@ -1023,14 +1006,10 @@ function openLinksPopup(product) {
   
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
+  
   await trackGlobalProductClick(product.name);
   const currentViews = await fetchProductClicksFromServer(product.name);
   popupProductViews.textContent = `👁️ ${currentViews} vue${currentViews > 1 ? 's' : ''}`;
-  
-  productPopup.classList.remove("hidden");
-}
-  
-  trackGlobalProductClick(product.name);
   
   productPopup.classList.remove("hidden");
 }
@@ -1084,7 +1063,7 @@ async function loadData() {
   }
 }
 
-function renderProducts(data) {
+async function renderProducts(data) {
   categoryContainer.innerHTML = "";
   if (data.length === 0) {
     categoryContainer.innerHTML = "<p style='text-align:center; color:var(--muted); margin-top:40px;'>Aucun produit trouvé.</p>";
@@ -1126,6 +1105,7 @@ function renderProducts(data) {
         pBadge.className = "price-badge"; pBadge.textContent = `${parseFloat(product.price).toFixed(2)}€`;
         cardElement.appendChild(pBadge);
       }
+
       const vBadge = document.createElement("div");
       vBadge.className = "views-badge";
       vBadge.innerHTML = `👁️ <span class="view-count-text">...</span>`;
@@ -1157,25 +1137,17 @@ function filterAndSort(e) {
   if (e && e.target === mobileCategorySelect) categorySelect.value = mobileCategorySelect.value;
   else if (e && e.target === categorySelect) mobileCategorySelect.value = categorySelect.value;
 
-  const searchValue = searchInput.value.trim();
-  
-  if (searchValue === "DASHBOARDRECAP") {
-    showDashboard();
-    return;
-  }
-  if (isDashboardMode) hideDashboard();
-  
-  const searchLower = searchValue.toLowerCase();
-  const sellerValue = sellerSelect.value;
-  const categoryValue = categorySelect.value; 
-  
-  let filtered = products.filter(p => {
-    const matchesName = p.name.toLowerCase().includes(searchLower);
-    const matchesCategory = (categoryValue === "all" || p.category.toUpperCase() === categoryValue.toUpperCase());
-    const matchesSeller = (sellerValue === "all") || (p.seller === sellerValue) || (sellerValue === "Sans vendeur" && !p.seller);
-    
-    return matchesName && matchesCategory && matchesSeller;
+  const query = searchInput.value.toLowerCase().trim();
+  const selectedSeller = sellerSelect.value;
+  const selectedCategory = categorySelect.value;
+
+  const filtered = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(query);
+    const matchSeller = (selectedSeller === "all" || p.seller === selectedSeller);
+    const matchCategory = (selectedCategory === "all" || p.category === selectedCategory);
+    return matchSearch && matchSeller && matchCategory;
   });
+
   renderProducts(filtered);
 }
 
@@ -1186,7 +1158,6 @@ mobileSellerSelect.addEventListener("change", filterAndSort);
 categorySelect.addEventListener("change", filterAndSort);
 mobileCategorySelect.addEventListener("change", filterAndSort);
 
-// Lancer le chargement des données au démarrage
 loadData();
 </script>
 </body>
