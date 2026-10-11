@@ -242,19 +242,37 @@
       display: none;
     }
 
-    .price-badge {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: var(--success);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      z-index: 5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
+.price-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--success);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.views-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
     .product-images {
       display: flex;
@@ -694,7 +712,7 @@
       <a id="popupWeidianLink" class="popup-btn weidian" target="_blank">Ouvrir le lien Weidian</a>
     </div>
     <span id="closeProductPopup" class="popup-close-text">Fermer</span>
-  </div>
+  <span id="popupProductViews" style="margin-left: 8px; font-weight: 600; color: var(--accent);">👁️ 0 vues</span>
 </div>
 
 <header class="topbar">
@@ -793,6 +811,7 @@
 // --- GESTION DU POPUP D'ACCUEIL ---
 (function initWelcomePopup() {
   const welcomePopup = document.getElementById("welcomePopup");
+  const popupProductViews = document.getElementById("popupProductViews");
   const closeWelcomeBtn = document.getElementById("closeWelcomePopup");
 
   // Afficher le popup à l'ouverture
@@ -1004,6 +1023,12 @@ function openLinksPopup(product) {
   
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
+  await trackGlobalProductClick(product.name);
+  const currentViews = await fetchProductClicksFromServer(product.name);
+  popupProductViews.textContent = `👁️ ${currentViews} vue${currentViews > 1 ? 's' : ''}`;
+  
+  productPopup.classList.remove("hidden");
+}
   
   trackGlobalProductClick(product.name);
   
@@ -1101,6 +1126,14 @@ function renderProducts(data) {
         pBadge.className = "price-badge"; pBadge.textContent = `${parseFloat(product.price).toFixed(2)}€`;
         cardElement.appendChild(pBadge);
       }
+      const vBadge = document.createElement("div");
+      vBadge.className = "views-badge";
+      vBadge.innerHTML = `👁️ <span class="view-count-text">...</span>`;
+      cardElement.appendChild(vBadge);
+
+      fetchProductClicksFromServer(product.name).then(views => {
+        vBadge.querySelector('.view-count-text').textContent = views;
+      });
 
       const imgCont = clone.querySelector(".product-images");
       product.images.forEach(url => {
