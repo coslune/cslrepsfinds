@@ -843,6 +843,9 @@ let products = [];
 let currentProduct = null;
 let isDashboardMode = false;
 
+// Cache local en mémoire pour éviter les requêtes lentes
+const viewsCache = {};
+
 const TARGET_CATEGORY_ORDER = ["T-SHIRT", "PANTALON", "PULL", "CHAUSSURES", "ACCESSOIRES", "MANTEAU", "SHORT"];
 const API_NAMESPACE = "cslfinds_v4_prod";
 
@@ -858,6 +861,12 @@ async function trackGlobalProductClick(productName) {
   if (hasUserClickedProduct(productName)) return; 
   
   const key = productName.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
+  
+  // Incrémentation immédiate en cache local pour la réactivité
+  if (viewsCache[productName] !== undefined) {
+    viewsCache[productName]++;
+  }
+  
   try {
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/${key}`).catch(() => {});
     await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/total_site_visits`).catch(() => {});
@@ -866,14 +875,21 @@ async function trackGlobalProductClick(productName) {
 }
 
 async function fetchProductClicksFromServer(productName) {
+  if (viewsCache[productName] !== undefined) {
+    return viewsCache[productName];
+  }
+  
   const key = productName.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 60);
   try {
     const res = await fetch(`https://api.countapi.xyz/get/${API_NAMESPACE}/${key}`);
     if(res.ok) {
       const data = await res.json();
-      return data.value || 0;
+      viewsCache[productName] = data.value || 0;
+      return viewsCache[productName];
     }
   } catch(e) {}
+  
+  viewsCache[productName] = 0;
   return 0;
 }
 
@@ -1007,11 +1023,22 @@ async function openLinksPopup(product) {
   popupBbdLink.href = product.bbd;
   popupWeidianLink.href = product.weidian;
   
-  await trackGlobalProductClick(product.name);
-  const currentViews = await fetchProductClicksFromServer(product.name);
-  popupProductViews.textContent = `👁️ ${currentViews} vue${currentViews > 1 ? 's' : ''}`;
+  // Affichage direct depuis le cache ou chargement rapide
+  const initialViews = await fetchProductClicksFromServer(product.name);
+  popupProductViews.textContent = `👁️ ${initialViews} vue${initialViews > 1 ? 's' : ''}`;
   
   productPopup.classList.remove("hidden");
+
+  // Enregistrement du clic en arrière-plan et mise à jour dynamique de la vue
+  await trackGlobalProductClick(product.name);
+  const updatedViews = await fetchProductClicksFromServer(product.name);
+  popupProductViews.textContent = `👁️ ${updatedViews} vue${updatedViews > 1 ? 's' : ''}`;
+  
+  // Met aussi à jour le badge sur la carte en arrière-plan sans recharger la page
+  const cardBadge = document.querySelector(`[data-product-name="${CSS.escape(product.name)}"] .view-count-text`);
+  if (cardBadge) {
+    cardBadge.textContent = updatedViews;
+  }
 }
 
 closeProductPopup.addEventListener("click", () => { productPopup.classList.add("hidden"); });
@@ -1091,6 +1118,7 @@ async function renderProducts(data) {
     for (const product of grouped[category]) {
       const clone = template.content.cloneNode(true);
       const cardElement = clone.querySelector(".product-card");
+      cardElement.setAttribute("data-product-name", product.name);
 
       clone.querySelector(".product-title").textContent = product.name;
       clone.querySelector(".product-category").textContent = product.category;
@@ -1111,6 +1139,7 @@ async function renderProducts(data) {
       vBadge.innerHTML = `👁️ <span class="view-count-text">...</span>`;
       cardElement.appendChild(vBadge);
 
+      // Chargement optimisé des vues en arrière-plan sans bloquer l'affichage
       fetchProductClicksFromServer(product.name).then(views => {
         vBadge.querySelector('.view-count-text').textContent = views;
       });
