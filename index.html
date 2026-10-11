@@ -514,7 +514,7 @@
   </div>
 </div>
 
-<!-- POPUP PRODUIT SIMPLE -->
+<!-- POPUP PRODUIT -->
 <div id="productPopup" class="popup-overlay hidden">
   <div class="popup-card">
     <h2 id="popupProductTitle">Nom du Produit</h2>
@@ -615,25 +615,42 @@ const closeProductPopup = document.getElementById("closeProductPopup");
 let products = [];
 const TARGET_CATEGORY_ORDER = ["T-SHIRT", "PANTALON", "PULL", "CHAUSSURES", "ACCESSOIRES", "MANTEAU", "SHORT"];
 
-// --- SYSTEME DE COMPTEUR ET CLICS LOCALSTORAGE STABLE ET IMMÉDIAT ---
-function getClicksMap() {
+// --- BASE DE DONNÉES EN LIGNE SYNCHRONISÉE EN TEMPS RÉEL ---
+const NAMESPACE = "csl_finds_v1";
+const viewsCache = {};
+
+function cleanKey(name) {
+  return name.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
+}
+
+// Récupération des clics depuis le serveur
+async function fetchServerClicks(productName) {
+  if (viewsCache[productName] !== undefined) return viewsCache[productName];
+  const key = cleanKey(productName);
   try {
-    return JSON.parse(localStorage.getItem('csl_product_clicks') || '{}');
-  } catch (e) {
-    return {};
-  }
+    const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}`);
+    if (res.ok) {
+      const data = await res.json();
+      viewsCache[productName] = data.count || 0;
+      return viewsCache[productName];
+    }
+  } catch (e) {}
+  viewsCache[productName] = 0;
+  return 0;
 }
 
-function getProductClicks(productName) {
-  const map = getClicksMap();
-  return map[productName] || 0;
-}
-
-function incrementClick(productName) {
-  const map = getClicksMap();
-  map[productName] = (map[productName] || 0) + 1;
-  localStorage.setItem('csl_product_clicks', JSON.stringify(map));
-  return map[productName];
+// Enregistrement d'un clic partagé en ligne
+async function incrementServerClick(productName) {
+  viewsCache[productName] = (viewsCache[productName] || 0) + 1;
+  const key = cleanKey(productName);
+  try {
+    const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}/up`);
+    if (res.ok) {
+      const data = await res.json();
+      viewsCache[productName] = data.count || viewsCache[productName];
+    }
+  } catch (e) {}
+  return viewsCache[productName];
 }
 
 // --- DÉTECTION TIKTOK ---
@@ -666,8 +683,8 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
 
-// --- POPUP DU PRODUIT AVEC INCRÉMENTATION EN TEMPS RÉEL ---
-function openLinksPopup(product, spanViewCount) {
+// --- POPUP DU PRODUIT AVEC SYNCHRONISATION ---
+async function openLinksPopup(product, spanViewCount) {
   popupProductTitle.textContent = product.name;
   popupProductCategory.textContent = `Catégorie : ${product.category}`;
   
@@ -681,13 +698,13 @@ function openLinksPopup(product, spanViewCount) {
   popupBbdLink.href = product.bbd || "#";
   popupWeidianLink.href = product.weidian || "#";
   
-  // Incrémente le compteur instantanément et met à jour l'icône de la carte
-  const newCount = incrementClick(product.name);
+  productPopup.classList.remove("hidden");
+
+  // Incrémente le compteur en ligne et met à jour l'affichage immédiatement
+  const newCount = await incrementServerClick(product.name);
   if (spanViewCount) {
     spanViewCount.textContent = newCount;
   }
-  
-  productPopup.classList.remove("hidden");
 }
 
 closeProductPopup.addEventListener("click", () => { productPopup.classList.add("hidden"); });
@@ -781,13 +798,17 @@ function renderProducts(data) {
       }
 
       // Nombre de vues
-      const currentViews = getProductClicks(product.name);
       const vBadge = document.createElement("div");
       vBadge.className = "views-badge";
-      vBadge.innerHTML = `<i class="fa-regular fa-eye text-[10px]"></i> <span class="view-count">${currentViews}</span>`;
+      vBadge.innerHTML = `<i class="fa-regular fa-eye text-[10px]"></i> <span class="view-count">...</span>`;
       cardElement.appendChild(vBadge);
 
       const spanViewCount = vBadge.querySelector('.view-count');
+
+      // Récupération asynchrone des vues réelles du serveur
+      fetchServerClicks(product.name).then(count => {
+        spanViewCount.textContent = count;
+      });
 
       const imgCont = clone.querySelector(".product-images");
       product.images.forEach(url => {
