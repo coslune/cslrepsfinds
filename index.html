@@ -249,25 +249,6 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
-    /* Badge Vues sur la carte */
-    .views-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(0, 0, 0, 0.75);
-      color: #e2e8f0;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      z-index: 5;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
     .product-images {
       display: flex;
       overflow-x: auto;
@@ -615,45 +596,6 @@ const closeProductPopup = document.getElementById("closeProductPopup");
 let products = [];
 const TARGET_CATEGORY_ORDER = ["T-SHIRT", "PANTALON", "PULL", "CHAUSSURES", "ACCESSOIRES", "MANTEAU", "SHORT"];
 
-// --- BASE DE DONNÉES EN LIGNE AVEC PROTECTION SECURED ---
-const NAMESPACE = "csl_finds_v1";
-const viewsCache = {};
-
-function cleanKey(name) {
-  return name.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
-}
-
-// Récupération sécurisée avec Timeout
-async function fetchServerClicks(productName) {
-  if (viewsCache[productName] !== undefined) return viewsCache[productName];
-  const key = cleanKey(productName);
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); // Annule si l'API met +2s
-    const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}`, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (res.ok) {
-      const data = await res.json();
-      viewsCache[productName] = data.count || 0;
-      return viewsCache[productName];
-    }
-  } catch (e) {}
-  viewsCache[productName] = viewsCache[productName] || 0;
-  return viewsCache[productName];
-}
-
-// Incrémentation partagée
-async function incrementServerClick(productName) {
-  viewsCache[productName] = (viewsCache[productName] || 0) + 1;
-  const key = cleanKey(productName);
-  try {
-    fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}/up`).then(res => res.json()).then(data => {
-      if (data && data.count) viewsCache[productName] = data.count;
-    }).catch(() => {});
-  } catch (e) {}
-  return viewsCache[productName];
-}
-
 // --- DÉTECTION TIKTOK ---
 (function detectTikTokBrowser() {
   const alreadySeen = localStorage.getItem("tiktokPopupSeen");
@@ -685,7 +627,7 @@ themeToggle.addEventListener("click", () => {
 });
 
 // --- POPUP PRODUIT ---
-async function openLinksPopup(product, spanViewCount) {
+function openLinksPopup(product) {
   popupProductTitle.textContent = product.name;
   popupProductCategory.textContent = `Catégorie : ${product.category}`;
   
@@ -700,12 +642,6 @@ async function openLinksPopup(product, spanViewCount) {
   popupWeidianLink.href = product.weidian || "#";
   
   productPopup.classList.remove("hidden");
-
-  // Incrémentation instantanée des clics
-  const newCount = await incrementServerClick(product.name);
-  if (spanViewCount) {
-    spanViewCount.textContent = newCount;
-  }
 }
 
 closeProductPopup.addEventListener("click", () => { productPopup.classList.add("hidden"); });
@@ -798,25 +734,12 @@ function renderProducts(data) {
         cardElement.appendChild(pBadge);
       }
 
-      // Nombre de vues
-      const vBadge = document.createElement("div");
-      vBadge.className = "views-badge";
-      vBadge.innerHTML = `<i class="fa-regular fa-eye text-[10px]"></i> <span class="view-count">0</span>`;
-      cardElement.appendChild(vBadge);
-
-      const spanViewCount = vBadge.querySelector('.view-count');
-
-      // Récupération asynchrone non-bloquante
-      fetchServerClicks(product.name).then(count => {
-        spanViewCount.textContent = count;
-      });
-
       const imgCont = clone.querySelector(".product-images");
       product.images.forEach(url => {
         const img = document.createElement("img"); img.src = url; img.loading = "lazy"; imgCont.appendChild(img);
       });
 
-      cardElement.addEventListener("click", () => openLinksPopup(product, spanViewCount));
+      cardElement.addEventListener("click", () => openLinksPopup(product));
       grid.appendChild(clone);
     }
     section.appendChild(title); section.appendChild(grid); categoryContainer.appendChild(section);
