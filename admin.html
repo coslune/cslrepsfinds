@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administration - CSL</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 25px;
+      max-width: 650px;
+      margin: auto;
+    }
+    .panel {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+    }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+    }
+    button {
+      background: #222;
+      color: white;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #admin { display: none; }
+    #message { margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Administration CSL</h1>
+
+    <section id="login">
+      <h2>Connexion</h2>
+      <input id="email" type="email" placeholder="Adresse e-mail">
+      <input id="password" type="password" placeholder="Mot de passe">
+      <button onclick="login()">Se connecter</button>
+    </section>
+
+    <section id="admin">
+      <h2>Ajouter un produit</h2>
+
+      <form id="productForm">
+        <input id="nom" placeholder="Nom du produit" required>
+        <input id="prix" type="number" step="0.01" min="0"
+          placeholder="Prix" required>
+        <input id="categorie" placeholder="Catégorie" required>
+        <input id="vendeur" placeholder="Vendeur">
+        <input id="image_url" type="url" placeholder="URL de l'image">
+        <input id="lien_bbdbuy" type="url" placeholder="Lien de la fiche autorisée">
+        <input id="lien_original" type="url" placeholder="Lien de l'article">
+        <button type="submit">Ajouter le produit</button>
+      </form>
+
+      <button onclick="logout()">Se déconnecter</button>
+    </section>
+
+    <p id="message" role="status"></p>
+  </div>
+
+  <script>
+    const message = document.getElementById("message");
+
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        message.textContent = "Erreur : " + error.message;
+        return;
+      }
+
+      showAdmin();
+    }
+
+    async function showAdmin() {
+      const { data } = await supabaseClient.auth.getSession();
+
+      if (data.session) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("admin").style.display = "block";
+      }
+    }
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      document.getElementById("login").style.display = "block";
+      document.getElementById("admin").style.display = "none";
+      message.textContent = "Déconnexion effectuée.";
+    }
+
+    document.getElementById("productForm").addEventListener("submit",
+      async function(event) {
+        event.preventDefault();
+
+        const produit = {
+          nom: document.getElementById("nom").value,
+          prix: Number(document.getElementById("prix").value),
+          categorie: document.getElementById("categorie").value,
+          vendeur: document.getElementById("vendeur").value,
+          image_url: document.getElementById("image_url").value,
+          lien_bbdbuy: document.getElementById("lien_bbdbuy").value,
+          lien_original: document.getElementById("lien_original").value
+        };
+
+        const { error } = await supabaseClient
+          .from("produits")
+          .insert([produit]);
+
+        if (error) {
+          message.textContent = "Erreur : " + error.message;
+          return;
+        }
+
+        message.textContent = "Produit ajouté avec succès !";
+        event.target.reset();
+      }
+    );
+
+    showAdmin();
+  </script>
+</body>
+</html>
