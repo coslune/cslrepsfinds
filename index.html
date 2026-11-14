@@ -651,11 +651,14 @@ productPopup.addEventListener("click", (e) => { if (e.target === productPopup) p
 
 // --- CHARGEMENT DES FICHIERS PRODUIT.TXT / CATEGORIE.TXT / VENDEUR.TXT ---
 
+
 async function loadData() {
   try {
-    // Charger les catégories depuis categorie.txt
-    const categoriesText = await fetch("categorie.txt?t=" + Date.now())
-      .then(res => res.text());
+    // 1. Charger les catégories
+    const categoriesText = await fetch("categorie.txt?t=" + Date.now()).then(res => {
+      if (!res.ok) throw new Error("Impossible de charger categorie.txt");
+      return res.text();
+    });
 
     const validCategories = categoriesText
       .replace(/[\r\n]/g, "")
@@ -676,6 +679,83 @@ async function loadData() {
       mobileCategorySelect.appendChild(opt2);
     });
 
+    // 2. Charger les vendeurs
+    try {
+      const sellersText = await fetch("vendeur.txt?t=" + Date.now()).then(res => res.text());
+      const sellers = sellersText.replace(/[\r\n]/g, "")
+        .trim().split("#").map(s => s.trim()).filter(Boolean);
+
+      sellers.forEach(seller => {
+        const opt1 = document.createElement("option");
+        opt1.value = seller;
+        opt1.textContent = seller;
+        sellerSelect.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = seller;
+        opt2.textContent = seller;
+        mobileSellerSelect.appendChild(opt2);
+      });
+    } catch (e) {
+      console.warn("Chargement des vendeurs impossible", e);
+    }
+
+    // 3. Charger les anciens produits depuis Produit.txt
+    const productsText = await fetch("Produit.txt?t=" + Date.now()).then(res => {
+      if (!res.ok) throw new Error("Impossible de charger Produit.txt");
+      return res.text();
+    });
+
+    const blocks = productsText.replace(/[\r\n]/g, "")
+      .trim().split("##").map(b => b.trim()).filter(Boolean);
+
+    const anciensProduits = [];
+
+    blocks.forEach(block => {
+      const infos = block.split("#").map(i => i.trim());
+      if (infos.length < 4) return;
+
+      anciensProduits.push({
+        category: infos[0],
+        name: infos[1],
+        price: infos[2] || "",
+        images: infos[3] ? infos[3].split(",").map(img => img.trim()).filter(Boolean) : [],
+        bbd: infos[4] || "",
+        weidian: infos[5] || "",
+        seller: infos[6] || ""
+      });
+    });
+
+    // 4. Charger les nouveaux produits depuis Supabase
+    const { data, error } = await supabaseClient
+      .from("produits")
+      .select("*");
+
+    if (error) throw error;
+
+    const nouveauxProduits = (data || []).map(p => ({
+      category: p.categorie || "",
+      name: p.nom || "",
+      price: p.prix ?? "",
+      images: p.image_url
+        ? p.image_url.split(",").map(img => img.trim()).filter(Boolean)
+        : [],
+      bbd: p.lien_bbdbuy || "",
+      weidian: p.lien_original || "",
+      seller: p.vendeur || ""
+    }));
+
+    // 5. Réunir les deux catalogues
+    products = [...anciensProduits, ...nouveauxProduits];
+
+    renderProducts(products);
+
+  } catch (err) {
+    console.error("Erreur chargement", err);
+    categoryContainer.innerHTML =
+      "<p style='text-align:center;'>Erreur lors du chargement des produits.</p>";
+  }
+}
     // Charger les vendeurs depuis vendeur.txt
     try {
       const sellersText = await fetch("vendeur.txt?t=" + Date.now())
