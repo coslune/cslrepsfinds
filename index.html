@@ -756,60 +756,6 @@ async function loadData() {
       "<p style='text-align:center;'>Erreur lors du chargement des produits.</p>";
   }
 }
-    // Charger les vendeurs depuis vendeur.txt
-    try {
-      const sellersText = await fetch("vendeur.txt?t=" + Date.now())
-        .then(res => res.text());
-
-      const sellers = sellersText
-        .replace(/[\r\n]/g, "")
-        .trim()
-        .split("#")
-        .map(s => s.trim())
-        .filter(Boolean);
-
-      sellers.forEach(seller => {
-        const opt1 = document.createElement("option");
-        opt1.value = seller;
-        opt1.textContent = seller;
-        sellerSelect.appendChild(opt1);
-
-        const opt2 = document.createElement("option");
-        opt2.value = seller;
-        opt2.textContent = seller;
-        mobileSellerSelect.appendChild(opt2);
-      });
-    } catch (e) {
-      console.warn("Chargement des vendeurs impossible", e);
-    }
-
-    // Charger les produits depuis Supabase
-    const { data, error } = await supabaseClient
-      .from("produits")
-      .select("*");
-
-    if (error) throw error;
-
-    products = (data || []).map(p => ({
-      name: p.nom,
-      category: p.categorie,
-      price: p.prix ?? "",
-      images: p.image_url
-        ? p.image_url.split(",").map(img => img.trim()).filter(Boolean)
-        : [],
-      bbd: p.lien_bbdbuy || "",
-      weidian: p.lien_original || "",
-      seller: p.vendeur || ""
-    }));
-
-    renderProducts(products);
-
-  } catch (err) {
-    console.error("Erreur chargement Supabase", err);
-    categoryContainer.innerHTML =
-      "<p style='text-align:center;'>Impossible de charger les produits.</p>";
-  }
-}
 // --- AFFICHAGE DES PRODUITS ---
 function renderProducts(data) {
   categoryContainer.innerHTML = "";
